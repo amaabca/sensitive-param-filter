@@ -40,7 +40,7 @@ class SensitiveParamFilter {
     try {
       const parsed = JSON.parse(input)
       const filtered = this.recursiveFilter(parsed)
-      return JSON.stringify(filtered)
+      return JSON.stringify(filtered, null, 1)
     } catch (error) {
       return input
     }

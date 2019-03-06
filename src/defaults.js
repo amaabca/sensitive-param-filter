@@ -1,7 +1,6 @@
 const DEFAULT_PARAMS = [
   'auth',
   'bearer',
-  'CC',
   'credit',
   'CVD',
   'CVV',
@@ -9,7 +8,6 @@ const DEFAULT_PARAMS = [
   'PAN',
   'pass',
   'secret',
-  'secur',
   'token'
 ]
 
