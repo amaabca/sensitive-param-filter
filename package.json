@@ -1,6 +1,6 @@
 {
   "name": "sensitive-param-filter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Recursively filter sensitive parameters from JS objects",
   "main": "src/index.js",
   "author": "Alberta Motor Association",
