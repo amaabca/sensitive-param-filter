@@ -33,7 +33,7 @@ describe('SensitiveParamFilter', () => {
   })
 
   describe('filter()', () => {
-    const paramList = ['password', 'auth', 'PrIvAtE']
+    const paramList = ['password', 'auth', 'PrIvAtE', 'credit_card']
     const replacement = 'FILTERED'
     const paramFilter = new SensitiveParamFilter(paramList, replacement)
 
@@ -218,6 +218,64 @@ describe('SensitiveParamFilter', () => {
 
       it('filters out JSON keys (case-insensitive) and matches partials', () => {
         expect(output.password).toBe('FILTERED')
+      })
+    })
+
+    describe('filtering nested arrays', () => {
+      const input = [
+        { Authorization: 'Bearer somedatatoken', method: 'GET', url: 'https://some.url.org' },
+        12345,
+        [
+          { password: 'qwery123456', username: 'alice.smith' },
+          'Hello World'
+        ],
+        '{ "amount": 9.75, "credit_card_number": "4551201891449281" }'
+      ]
+      input[2].push(input)
+
+      const inputLength = input.length
+      const inputIndex2Length = input[2].length
+
+      const output = paramFilter.filter(input)
+
+      it('does not modify the original object', () => {
+        expect(input.length).toBe(inputLength)
+        expect(input[2].length).toBe(inputIndex2Length)
+
+        expect(input[0].Authorization).toBe('Bearer somedatatoken')
+        expect(input[0].method).toBe('GET')
+        expect(input[0].url).toBe('https://some.url.org')
+        expect(input[1]).toBe(12345)
+        expect(input[2][0].password).toBe('qwery123456')
+        expect(input[2][0].username).toBe('alice.smith')
+        expect(input[2][1]).toBe('Hello World')
+        expect(input[2][2]).toBe(input)
+        expect(input[3]).toBe('{ "amount": 9.75, "credit_card_number": "4551201891449281" }')
+      })
+
+      it('maintains non-sensitive data in the output object, including circular references', () => {
+        expect(output.length).toBe(inputLength)
+        expect(output[2].length).toBe(inputIndex2Length)
+
+        expect(output[0].method).toBe('GET')
+        expect(output[0].url).toBe('https://some.url.org')
+        expect(output[1]).toBe(12345)
+        expect(output[2][0].username).toBe('alice.smith')
+        expect(output[2][1]).toBe('Hello World')
+        expect(output[2][2]).toBe(output)
+      })
+
+      it('filters out object keys in a case-insensitive, partial-matching manner', () => {
+        expect(output[0].Authorization).toBe('FILTERED')
+        expect(output[2][0].password).toBe('FILTERED')
+      })
+
+      it('filters out JSON keys and matches partials while maintaining non-sensitive data', () => {
+        const outputIndex3Object = JSON.parse(output[3])
+        expect(Object.keys(outputIndex3Object).length).toBe(2)
+
+        expect(outputIndex3Object.amount).toBe(9.75)
+        expect(outputIndex3Object.credit_card_number).toBe('FILTERED')
       })
     })
   })

@@ -32,6 +32,8 @@ class SensitiveParamFilter {
       return this.filterError(input)
     } else if (input && typeof input === 'object' && input.constructor === Object) {
       return this.filterObject(input)
+    } else if (Array.isArray(input)) {
+      return this.filterArray(input)
     }
     return input
   }
@@ -64,7 +66,8 @@ class SensitiveParamFilter {
     for (const key in input) { // eslint-disable-line guard-for-in
       copy[key] = input[key]
     }
-    this.saveCopyAndRecursivelyFilter(input, copy)
+    this.saveCopy(input, copy)
+    this.recursivelyFilterAttributes(copy)
     return copy
   }
 
@@ -74,17 +77,34 @@ class SensitiveParamFilter {
       return this.examinedObjects[id].copy
     }
     const copy = { ...input }
-    this.saveCopyAndRecursivelyFilter(input, copy)
+    this.saveCopy(input, copy)
+    this.recursivelyFilterAttributes(copy)
     return copy
   }
 
-  saveCopyAndRecursivelyFilter(original, copy) {
+  filterArray(input) {
+    const id = input[this.objectIdKey]
+    if (id || id === 0) {
+      return this.examinedObjects[id].copy
+    }
+    const copy = []
+    this.saveCopy(input, copy)
+    for (const item of input) {
+      copy.push(this.recursiveFilter(item))
+    }
+    return copy
+  }
+
+  saveCopy(original, copy) {
     const id = this.examinedObjects.length
     original[this.objectIdKey] = id
     this.examinedObjects.push({
       copy,
       original
     })
+  }
+
+  recursivelyFilterAttributes(copy) {
     for (const key in copy) {
       if (this.whitelistRegex.test(key)) {
         copy[key] = this.recursiveFilter(copy[key])
