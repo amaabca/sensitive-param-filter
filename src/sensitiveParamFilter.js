@@ -6,7 +6,8 @@ const {
 const {
   constructParamRegex,
   constructWhitelistRegex,
-  generateRandomString
+  generateRandomString,
+  parseUrlParams
 } = require('./helpers')
 
 class SensitiveParamFilter {
@@ -47,7 +48,23 @@ class SensitiveParamFilter {
       const filtered = this.recursiveFilter(parsed)
       return JSON.stringify(filtered)
     } catch (error) {
-      return input
+      const parsedUrlParams = parseUrlParams(input)
+      let filtered = ''
+      parsedUrlParams.forEach((result, index) => {
+        if (index % 2 === 0) {
+          filtered += result
+        } else {
+          const { key, value } = result
+          if (this.whitelistRegex.test(key)) {
+            filtered += `${key}=${value}`
+          } else if (this.paramRegex.test(key)) {
+            filtered += `${key}=${this.replacement}`
+          } else {
+            filtered += `${key}=${value}`
+          }
+        }
+      })
+      return filtered
     }
   }
 
