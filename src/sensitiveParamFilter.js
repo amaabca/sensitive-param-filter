@@ -44,7 +44,12 @@ class SensitiveParamFilter {
       const filtered = this.recursiveFilter(parsed)
       return JSON.stringify(filtered)
     } catch (error) {
-      return input
+      const strippedInput = input.replace(this.whitelistRegex, '')
+      if (this.paramRegex.test(strippedInput)) {
+        return this.replacement
+      } else {
+        return input
+      }
     }
   }
 

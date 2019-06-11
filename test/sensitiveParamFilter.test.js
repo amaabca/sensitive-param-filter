@@ -44,6 +44,7 @@ describe('SensitiveParamFilter', () => {
           'Private-Data': 'somesecretstuff',
           info: '{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }'
         },
+        dump: 'This string is not JSON-parseable, and my password is "h54(@jfd54#@".',
         method: 'POST',
         numRetries: 6,
         password: 'asecurepassword1234',
@@ -63,6 +64,7 @@ describe('SensitiveParamFilter', () => {
         expect(input.password).toBe('asecurepassword1234')
         expect(input.username).toBe('bob.bobbington')
         expect(input.Authorization).toBe('Bearer somedatatoken')
+        expect(input.dump).toBe('This string is not JSON-parseable, and my password is "h54(@jfd54#@".')
         expect(input.method).toBe('POST')
         expect(input.body['Private-Data']).toBe('somesecretstuff')
         expect(input.body.info).toBe('{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }') // eslint-disable-line max-len
@@ -94,6 +96,10 @@ describe('SensitiveParamFilter', () => {
         expect(outputInfoObject.first_name).toBe('Bob')
         expect(outputInfoObject.last_name).toBe('Bobbington')
         expect(outputInfoObject.amount).toBe(4)
+      })
+
+      it('filters out non-JSON strings if they contain sensitive keys', () => {
+        expect(output.dump).toBe('FILTERED')
       })
     })
 
