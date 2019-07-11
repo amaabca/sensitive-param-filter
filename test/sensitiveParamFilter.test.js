@@ -54,7 +54,10 @@ describe('SensitiveParamFilter', () => {
       const numInputKeys = Object.keys(input).length
       const numBodyKeys = Object.keys(input.body).length
 
-      const output = paramFilter.filter(input)
+      let output = null
+      beforeAll(() => {
+        output = paramFilter.filter(input)
+      })
 
       it('does not modify the original object', () => {
         expect(Object.keys(input).length).toBe(numInputKeys)
@@ -97,6 +100,72 @@ describe('SensitiveParamFilter', () => {
       })
     })
 
+    describe('filtering a custom object with read-only and non-enumerable properties', () => {
+      class VeryUnusualClass {
+        constructor () {
+          this.password = 'hunter12'
+          Object.defineProperty(this, 'readonly', {
+            enumerable: true,
+            value: 42,
+            writable: false
+          })
+          Object.defineProperty(this, 'hidden', {
+            enumerable: false,
+            value: 'You cannot see me',
+            writable: true
+          })
+        }
+        doSomething() {
+          return `${this.readonly} ${this.hidden}`
+        }
+      }
+      const input = {
+        message: 'hello',
+        veryUnusualObject: new VeryUnusualClass()
+      }
+
+      const numInputKeys = Object.keys(input).length
+      const numveryUnusualObjectKeys = Object.keys(input.veryUnusualObject).length
+      const veryUnusualObjectType = typeof veryUnusualObject
+      const veryUnusualObjectConstructor = input.veryUnusualObject.constructor
+
+      let output = null
+      beforeAll(() => {
+        output = paramFilter.filter(input)
+      })
+
+      it('does not modify the original object', () => {
+        expect(Object.keys(input).length).toBe(numInputKeys)
+        expect(Object.keys(input.veryUnusualObject).length).toBe(numveryUnusualObjectKeys)
+        expect(typeof input).veryUnusualObject.toBe(veryUnusualObjectType)
+        expect(input.veryUnusualObject.constructor).toBe(veryUnusualObjectConstructor)
+
+        expect(input.message).toBe('hello')
+        expect(input.veryUnusualObject.password).toBe('hunter12')
+        expect(input.veryUnusualObject.readonly).toBe(42)
+        expect(input.veryUnusualObject.hidden).toBe('You cannot see me')
+        expect(input.veryUnusualObject.doSomething()).toBe('42 You cannot see me')
+      })
+
+      it('maintains non-sensitive, enumerable data in the output object', () => {
+        expect(Object.keys(output).length).toBe(numInputKeys)
+        expect(Object.keys(output.veryUnusualObject).length).toBe(numveryUnusualObjectKeys)
+
+        expect(output.message).toBe('hello')
+        expect(input.veryUnusualObject.readonly).toBe(42)
+      })
+
+      it('filters out object keys in a case-insensitive, partial-matching manner', () => {
+        expect(output.veryUnusualObject.password).toBe('FILTERED')
+      })
+
+      it('does not maintain hidden properties, methods, or type information from the original object', () => {
+        expect(output.veryUnusualObject.readonly).toBeUndefined()
+        expect(output.veryUnusualObject.doSomething).toBeUndefined()
+        expect(output.veryUnusualObject.constructor).toBeUndefined()
+      })
+    })
+
     describe('filtering a JSON parse error', () => {
       let input = null
       try {
@@ -119,7 +188,10 @@ describe('SensitiveParamFilter', () => {
       const inputType = typeof input
       const inputConstructor = input.constructor
 
-      const output = paramFilter.filter(input)
+      let output = null
+      beforeAll(() => {
+        output = paramFilter.filter(input)
+      })
 
       it('does not modify the original error', () => {
         expect(Object.keys(input).length).toBe(numInputKeys)
@@ -161,66 +233,6 @@ describe('SensitiveParamFilter', () => {
       })
     })
 
-    describe('filtering a custom error with a non-standard constructor', () => {
-      class VeryUnusualError extends Error {
-        constructor (...args) {
-          super(...args)
-          this.weirdAttribute = args[1].name
-          this.code = 'VERY_UNUSUAL_ERROR'
-        }
-      }
-
-      let input = null
-      try {
-        throw new VeryUnusualError(
-          'Something went wrong',
-          { name: 'Unexpected' }
-        )
-      } catch (error) {
-        input = error
-      }
-      input.password = 'hunter12'
-
-      const inputMessage = input.message
-      const inputStack = input.stack
-      const inputCode = input.code
-
-      const numInputKeys = Object.keys(input).length
-      const inputType = typeof input
-      const inputConstructor = input.constructor
-
-      const output = paramFilter.filter(input)
-
-      it('does not modify the original error', () => {
-        expect(Object.keys(input).length).toBe(numInputKeys)
-        expect(typeof input).toBe(inputType)
-        expect(input.constructor).toBe(inputConstructor)
-
-        expect(input.message).toBe(inputMessage)
-        expect(input.stack).toBe(inputStack)
-        expect(input.code).toBe(inputCode)
-
-        expect(input.weirdAttribute).toBe('Unexpected')
-        expect(input.password).toBe('hunter12')
-      })
-
-      it('maintains non-sensitive data in the output error, but cannot maintain the exact error type', () => {
-        expect(Object.keys(output).length).toBe(numInputKeys)
-        expect(typeof output).toBe(inputType)
-        expect(output.constructor).not.toBe(inputConstructor)
-
-        expect(output.message).toBe(inputMessage)
-        expect(output.stack).toBe(inputStack)
-        expect(output.code).toBe(inputCode)
-
-        expect(output.weirdAttribute).toBe('Unexpected')
-      })
-
-      it('filters out JSON keys (case-insensitive) and matches partials', () => {
-        expect(output.password).toBe('FILTERED')
-      })
-    })
-
     describe('filtering nested arrays', () => {
       const input = [
         { Authorization: 'Bearer somedatatoken', method: 'GET', url: 'https://some.url.org' },
@@ -236,7 +248,10 @@ describe('SensitiveParamFilter', () => {
       const inputLength = input.length
       const inputIndex2Length = input[2].length
 
-      const output = paramFilter.filter(input)
+      let output = null
+      beforeAll(() => {
+        output = paramFilter.filter(input)
+      })
 
       it('does not modify the original object', () => {
         expect(input.length).toBe(inputLength)
