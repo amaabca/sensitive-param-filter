@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+
 const { SensitiveParamFilter } = require('../src')
 
 describe('SensitiveParamFilter', () => {
@@ -104,21 +106,23 @@ describe('SensitiveParamFilter', () => {
       class VeryUnusualClass {
         constructor () {
           this.password = 'hunter12'
-          Object.defineProperty(this, 'readonly', {
+          Reflect.defineProperty(this, 'readonly', {
             enumerable: true,
             value: 42,
             writable: false
           })
-          Object.defineProperty(this, 'hidden', {
+          Reflect.defineProperty(this, 'hidden', {
             enumerable: false,
             value: 'You cannot see me',
             writable: true
           })
         }
+
         doSomething() {
           return `${this.readonly} ${this.hidden}`
         }
       }
+
       const input = {
         message: 'hello',
         veryUnusualObject: new VeryUnusualClass()
@@ -169,8 +173,8 @@ describe('SensitiveParamFilter', () => {
     describe('filtering errors with a code', () => {
       const input = new Error('Something broke')
       input.code = 'ERR_BROKEN'
-      let output
 
+      let output = null
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -183,22 +187,22 @@ describe('SensitiveParamFilter', () => {
     })
 
     describe('filtering a custom error with non-standard fields', () => {
-      const message = 'Super broken'
-      const password = 'hunter12'
-      const readonly = 42
-      const hidden = 'You cannot see me'
+      const inputMessage = 'Super broken'
+      const inputPassword = 'hunter12'
+      const inputReadonly = 42
+      const inputHidden = 'You cannot see me'
 
       class CustomError extends Error {
         constructor (message, password, readonly, hidden) {
           super(message)
 
           this.password = password
-          Object.defineProperty(this, 'readonly', {
+          Reflect.defineProperty(this, 'readonly', {
             enumerable: true,
             value: readonly,
             writable: false
           })
-          Object.defineProperty(this, 'hidden', {
+          Reflect.defineProperty(this, 'hidden', {
             enumerable: false,
             value: hidden,
             writable: true
@@ -206,13 +210,12 @@ describe('SensitiveParamFilter', () => {
         }
       }
 
-      const input =  new CustomError(message, password, readonly, hidden)
+      const input = new CustomError(inputMessage, inputPassword, inputReadonly, inputHidden)
       const inputKeyCount = Object.keys(input).length
       const inputType = typeof input
       const inputConstructor = input.constructor
 
-      let output
-
+      let output = null
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -222,14 +225,14 @@ describe('SensitiveParamFilter', () => {
         expect(typeof input).toBe(inputType)
         expect(input.constructor).toBe(inputConstructor)
 
-        expect(input.message).toBe(message)
+        expect(input.message).toBe(inputMessage)
         expect(input.password).toBe('hunter12')
         expect(input.readonly).toBe(42)
         expect(input.hidden).toBe('You cannot see me')
       })
 
       it('maintains non-sensitive, enumerable data in the output error', () => {
-        expect(output.message).toBe(message)
+        expect(output.message).toBe(inputMessage)
       })
 
       it('does not maintain sensitive data in the output error', () => {
@@ -371,9 +374,9 @@ describe('SensitiveParamFilter', () => {
     })
 
     describe('filtering functions', () => {
-      const input = () => {}
-      let output
+      const input = () => {} // eslint-disable-line no-empty-function
 
+      let output = null
       beforeEach(() => {
         output = paramFilter.filter(input)
       })

@@ -6,7 +6,8 @@ const {
 const {
   constructParamRegex,
   constructWhitelistRegex,
-  generateRandomString
+  generateRandomString,
+  writable
 } = require('./helpers')
 
 class SensitiveParamFilter {
@@ -63,7 +64,7 @@ class SensitiveParamFilter {
     }
 
     for (const key in input) { // eslint-disable-line guard-for-in
-      if (this.writable(input, key)) {
+      if (writable(input, key)) {
         copy[key] = input[key]
       }
     }
@@ -107,16 +108,14 @@ class SensitiveParamFilter {
 
   recursivelyFilterAttributes(copy) {
     for (const key in copy) {
-      if (!this.writable(copy, key)) {
-        continue
-      }
-
-      if (this.whitelistRegex.test(key)) {
-        copy[key] = this.recursiveFilter(copy[key])
-      } else if (this.paramRegex.test(key)) {
-        copy[key] = this.replacement
-      } else {
-        copy[key] = this.recursiveFilter(copy[key])
+      if (writable(copy, key)) {
+        if (this.whitelistRegex.test(key)) {
+          copy[key] = this.recursiveFilter(copy[key])
+        } else if (this.paramRegex.test(key)) {
+          copy[key] = this.replacement
+        } else {
+          copy[key] = this.recursiveFilter(copy[key])
+        }
       }
     }
   }
@@ -125,11 +124,6 @@ class SensitiveParamFilter {
     for (const examinedObject of this.examinedObjects) {
       Reflect.deleteProperty(examinedObject.original, this.objectIdKey)
     }
-  }
-
-  writable(object, property) {
-    const desc = Object.getOwnPropertyDescriptor(object, property)
-    return desc.writable
   }
 }
 
