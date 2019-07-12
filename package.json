@@ -11,7 +11,8 @@
   },
   "scripts": {
     "lint": "eslint ./src ./test",
-    "test": "jest --coverage && yarn lint"
+    "test": "jest --coverage && yarn lint",
+    "test-ci": "jest --coverage --ci"
   },
   "jest": {
     "collectCoverage": true,
