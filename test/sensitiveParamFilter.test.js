@@ -55,7 +55,7 @@ describe('SensitiveParamFilter', () => {
       const numBodyKeys = Object.keys(input.body).length
 
       let output = null
-      beforeAll(() => {
+      beforeEach(() => {
         output = paramFilter.filter(input)
       })
 
@@ -126,18 +126,18 @@ describe('SensitiveParamFilter', () => {
 
       const numInputKeys = Object.keys(input).length
       const numveryUnusualObjectKeys = Object.keys(input.veryUnusualObject).length
-      const veryUnusualObjectType = typeof veryUnusualObject
+      const veryUnusualObjectType = typeof input.veryUnusualObject
       const veryUnusualObjectConstructor = input.veryUnusualObject.constructor
 
       let output = null
-      beforeAll(() => {
+      beforeEach(() => {
         output = paramFilter.filter(input)
       })
 
       it('does not modify the original object', () => {
         expect(Object.keys(input).length).toBe(numInputKeys)
         expect(Object.keys(input.veryUnusualObject).length).toBe(numveryUnusualObjectKeys)
-        expect(typeof input).veryUnusualObject.toBe(veryUnusualObjectType)
+        expect(typeof input.veryUnusualObject).toBe(veryUnusualObjectType)
         expect(input.veryUnusualObject.constructor).toBe(veryUnusualObjectConstructor)
 
         expect(input.message).toBe('hello')
@@ -160,9 +160,85 @@ describe('SensitiveParamFilter', () => {
       })
 
       it('does not maintain hidden properties, methods, or type information from the original object', () => {
-        expect(output.veryUnusualObject.readonly).toBeUndefined()
+        expect(output.veryUnusualObject.hidden).toBeUndefined()
         expect(output.veryUnusualObject.doSomething).toBeUndefined()
-        expect(output.veryUnusualObject.constructor).toBeUndefined()
+        expect(output.veryUnusualObject.constructor).not.toBe(veryUnusualObjectConstructor)
+      })
+    })
+
+    describe('filtering errors with a code', () => {
+      const input = new Error('Something broke')
+      input.code = 'ERR_BROKEN'
+      let output
+
+      beforeEach(() => {
+        output = paramFilter.filter(input)
+      })
+
+      it('maintains the error code and message', () => {
+        expect(output).toBeInstanceOf(Error)
+        expect(output.code).toBe(input.code)
+        expect(output.message).toBe(input.message)
+      })
+    })
+
+    describe('filtering a custom error with non-standard fields', () => {
+      const message = 'Super broken'
+      const password = 'hunter12'
+      const readonly = 42
+      const hidden = 'You cannot see me'
+
+      class CustomError extends Error {
+        constructor (message, password, readonly, hidden) {
+          super(message)
+
+          this.password = password
+          Object.defineProperty(this, 'readonly', {
+            enumerable: true,
+            value: readonly,
+            writable: false
+          })
+          Object.defineProperty(this, 'hidden', {
+            enumerable: false,
+            value: hidden,
+            writable: true
+          })
+        }
+      }
+
+      const input =  new CustomError(message, password, readonly, hidden)
+      const inputKeyCount = Object.keys(input).length
+      const inputType = typeof input
+      const inputConstructor = input.constructor
+
+      let output
+
+      beforeEach(() => {
+        output = paramFilter.filter(input)
+      })
+
+      it('does not modify the original error', () => {
+        expect(Object.keys(input).length).toBe(inputKeyCount)
+        expect(typeof input).toBe(inputType)
+        expect(input.constructor).toBe(inputConstructor)
+
+        expect(input.message).toBe(message)
+        expect(input.password).toBe('hunter12')
+        expect(input.readonly).toBe(42)
+        expect(input.hidden).toBe('You cannot see me')
+      })
+
+      it('maintains non-sensitive, enumerable data in the output error', () => {
+        expect(output.message).toBe(message)
+      })
+
+      it('does not maintain sensitive data in the output error', () => {
+        expect(output.password).toBe('FILTERED')
+      })
+
+      it('does not maintain hidden or read-only properties from the original error', () => {
+        expect(output.hidden).toBeUndefined()
+        expect(output.readonly).toBeUndefined()
       })
     })
 
@@ -189,7 +265,7 @@ describe('SensitiveParamFilter', () => {
       const inputConstructor = input.constructor
 
       let output = null
-      beforeAll(() => {
+      beforeEach(() => {
         output = paramFilter.filter(input)
       })
 
@@ -249,7 +325,7 @@ describe('SensitiveParamFilter', () => {
       const inputIndex2Length = input[2].length
 
       let output = null
-      beforeAll(() => {
+      beforeEach(() => {
         output = paramFilter.filter(input)
       })
 
@@ -291,6 +367,19 @@ describe('SensitiveParamFilter', () => {
 
         expect(outputIndex3Object.amount).toBe(9.75)
         expect(outputIndex3Object.credit_card_number).toBe('FILTERED')
+      })
+    })
+
+    describe('filtering functions', () => {
+      const input = () => {}
+      let output
+
+      beforeEach(() => {
+        output = paramFilter.filter(input)
+      })
+
+      it('returns null', () => {
+        expect(output).toBeNull()
       })
     })
   })

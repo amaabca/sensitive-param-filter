@@ -26,16 +26,19 @@ class SensitiveParamFilter {
   }
 
   recursiveFilter(input) {
-    if (typeof input === 'string' || input instanceof String) {
+    if (!input || typeof input === 'number' || typeof input === 'boolean') {
+      return input
+    } else if (typeof input === 'string' || input instanceof String) {
       return this.filterString(input)
     } else if (input instanceof Error) {
       return this.filterError(input)
-    } else if (input && typeof input === 'object' && input.constructor === Object) {
-      return this.filterObject(input)
     } else if (Array.isArray(input)) {
       return this.filterArray(input)
+    } else if (typeof input === 'object') {
+      return this.filterObject(input)
     }
-    return input
+
+    return null
   }
 
   filterString(input) {
@@ -53,18 +56,16 @@ class SensitiveParamFilter {
     if (id || id === 0) {
       return this.examinedObjects[id].copy
     }
-    let copy = null
-    try {
-      copy = new input.constructor(input.message)
-    } catch (error) {
-      copy = new Error(input.message)
-    }
+    const copy = new input.constructor(input.message)
     copy.stack = input.stack
     if (input.code) {
       copy.code = input.code
     }
+
     for (const key in input) { // eslint-disable-line guard-for-in
-      copy[key] = input[key]
+      if (this.writable(input, key)) {
+        copy[key] = input[key]
+      }
     }
     this.saveCopy(input, copy)
     this.recursivelyFilterAttributes(copy)
@@ -106,6 +107,10 @@ class SensitiveParamFilter {
 
   recursivelyFilterAttributes(copy) {
     for (const key in copy) {
+      if (!this.writable(copy, key)) {
+        continue
+      }
+
       if (this.whitelistRegex.test(key)) {
         copy[key] = this.recursiveFilter(copy[key])
       } else if (this.paramRegex.test(key)) {
@@ -120,6 +125,11 @@ class SensitiveParamFilter {
     for (const examinedObject of this.examinedObjects) {
       Reflect.deleteProperty(examinedObject.original, this.objectIdKey)
     }
+  }
+
+  writable(object, property) {
+    const desc = Object.getOwnPropertyDescriptor(object, property)
+    return desc.writable
   }
 }
 
