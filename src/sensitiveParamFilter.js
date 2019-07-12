@@ -6,8 +6,7 @@ const {
 const {
   constructParamRegex,
   constructWhitelistRegex,
-  generateRandomString,
-  writable
+  generateRandomString
 } = require('./helpers')
 
 class SensitiveParamFilter {
@@ -57,16 +56,14 @@ class SensitiveParamFilter {
     if (id || id === 0) {
       return this.examinedObjects[id].copy
     }
-    const copy = new input.constructor(input.message)
+    const copy = new Error(`${input.constructor.name}: ${input.message}`)
     copy.stack = input.stack
     if (input.code) {
       copy.code = input.code
     }
 
     for (const key in input) { // eslint-disable-line guard-for-in
-      if (writable(input, key)) {
-        copy[key] = input[key]
-      }
+      copy[key] = input[key]
     }
     this.saveCopy(input, copy)
     this.recursivelyFilterAttributes(copy)
@@ -108,14 +105,12 @@ class SensitiveParamFilter {
 
   recursivelyFilterAttributes(copy) {
     for (const key in copy) {
-      if (writable(copy, key)) {
-        if (this.whitelistRegex.test(key)) {
-          copy[key] = this.recursiveFilter(copy[key])
-        } else if (this.paramRegex.test(key)) {
-          copy[key] = this.replacement
-        } else {
-          copy[key] = this.recursiveFilter(copy[key])
-        }
+      if (this.whitelistRegex.test(key)) {
+        copy[key] = this.recursiveFilter(copy[key])
+      } else if (this.paramRegex.test(key)) {
+        copy[key] = this.replacement
+      } else {
+        copy[key] = this.recursiveFilter(copy[key])
       }
     }
   }

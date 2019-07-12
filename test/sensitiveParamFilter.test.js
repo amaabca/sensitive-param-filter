@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+/* eslint-disable max-lines, max-statements */
 
 const { SensitiveParamFilter } = require('../src')
 
@@ -179,10 +179,13 @@ describe('SensitiveParamFilter', () => {
         output = paramFilter.filter(input)
       })
 
-      it('maintains the error code and message', () => {
+      it('maintains the error code and type', () => {
         expect(output).toBeInstanceOf(Error)
         expect(output.code).toBe(input.code)
-        expect(output.message).toBe(input.message)
+      })
+
+      it('preprends error type to the message', () => {
+        expect(output.message).toBe(`Error: ${input.message}`)
       })
     })
 
@@ -226,22 +229,29 @@ describe('SensitiveParamFilter', () => {
         expect(input.constructor).toBe(inputConstructor)
 
         expect(input.message).toBe(inputMessage)
-        expect(input.password).toBe('hunter12')
-        expect(input.readonly).toBe(42)
-        expect(input.hidden).toBe('You cannot see me')
+        expect(input.password).toBe(inputPassword)
+        expect(input.readonly).toBe(inputReadonly)
+        expect(input.hidden).toBe(inputHidden)
+      })
+
+      it('preprends error type to the message', () => {
+        expect(output.message).toBe(`CustomError: ${inputMessage}`)
       })
 
       it('maintains non-sensitive, enumerable data in the output error', () => {
-        expect(output.message).toBe(inputMessage)
+        expect(output.readonly).toBe(inputReadonly)
       })
 
       it('does not maintain sensitive data in the output error', () => {
         expect(output.password).toBe('FILTERED')
       })
 
-      it('does not maintain hidden or read-only properties from the original error', () => {
+      it('converts to a plain Error', () => {
+        expect(output.constructor).toBe(Error)
+      })
+
+      it('does not maintain hidden properties from the original error', () => {
         expect(output.hidden).toBeUndefined()
-        expect(output.readonly).toBeUndefined()
       })
     })
 
@@ -287,12 +297,18 @@ describe('SensitiveParamFilter', () => {
         expect(input.customData.error).toBe(input)
       })
 
-      it('maintains non-sensitive data and error type in the output, including circular references', () => {
+      it('converts to a plain Error', () => {
+        expect(output.constructor).toBe(Error)
+      })
+
+      it('preprends error type to the message', () => {
+        expect(output.message).toBe(`SyntaxError: ${inputMessage}`)
+      })
+
+      it('maintains non-sensitive data in the output, including circular references', () => {
         expect(Object.keys(output).length).toBe(numInputKeys)
         expect(typeof output).toBe(inputType)
-        expect(output.constructor).toBe(inputConstructor)
 
-        expect(output.message).toBe(inputMessage)
         expect(output.stack).toBe(inputStack)
         expect(output.code).toBe(inputCode)
 

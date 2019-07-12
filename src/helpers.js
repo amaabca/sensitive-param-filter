@@ -17,14 +17,8 @@ const constructWhitelistRegex = (whitelist) => {
 
 const generateRandomString = (length) => crypto.randomBytes(length).toString('hex')
 
-const writable = (object, property) => {
-  const desc = Reflect.getOwnPropertyDescriptor(object, property)
-  return desc.writable
-}
-
 module.exports = {
   constructParamRegex,
   constructWhitelistRegex,
-  generateRandomString,
-  writable
+  generateRandomString
 }
