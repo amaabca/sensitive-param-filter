@@ -26,16 +26,19 @@ class SensitiveParamFilter {
   }
 
   recursiveFilter(input) {
-    if (typeof input === 'string' || input instanceof String) {
+    if (!input || typeof input === 'number' || typeof input === 'boolean') {
+      return input
+    } else if (typeof input === 'string' || input instanceof String) {
       return this.filterString(input)
     } else if (input instanceof Error) {
       return this.filterError(input)
-    } else if (input && typeof input === 'object' && input.constructor === Object) {
-      return this.filterObject(input)
     } else if (Array.isArray(input)) {
       return this.filterArray(input)
+    } else if (typeof input === 'object') {
+      return this.filterObject(input)
     }
-    return input
+
+    return null
   }
 
   filterString(input) {
@@ -53,16 +56,26 @@ class SensitiveParamFilter {
     if (id || id === 0) {
       return this.examinedObjects[id].copy
     }
-    let copy = null
-    try {
-      copy = new input.constructor(input.message)
-    } catch (error) {
-      copy = new Error(input.message)
-    }
-    copy.stack = input.stack
+
+    const copy = new Error(input.message)
+    Object.defineProperties(copy, {
+      name: {
+        configurable: true,
+        enumerable: false,
+        value: input.name,
+        writable: true
+      },
+      stack: {
+        configurable: true,
+        enumerable: false,
+        value: input.stack,
+        writable: true
+      }
+    })
     if (input.code) {
       copy.code = input.code
     }
+
     for (const key in input) { // eslint-disable-line guard-for-in
       copy[key] = input[key]
     }
