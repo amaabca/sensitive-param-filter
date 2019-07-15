@@ -185,7 +185,7 @@ describe('SensitiveParamFilter', () => {
       })
 
       it('preprends error type to the message', () => {
-        expect(output.message).toBe(`Error: ${input.message}`)
+        expect(output.message).toBe(input.message)
       })
     })
 
@@ -200,15 +200,22 @@ describe('SensitiveParamFilter', () => {
           super(message)
 
           this.password = password
-          Reflect.defineProperty(this, 'readonly', {
-            enumerable: true,
-            value: readonly,
-            writable: false
-          })
-          Reflect.defineProperty(this, 'hidden', {
-            enumerable: false,
-            value: hidden,
-            writable: true
+          Object.defineProperties(this, {
+            hidden: {
+              enumerable: false,
+              value: hidden,
+              writable: true
+            },
+            name: {
+              enumerable: false,
+              value: this.constructor.name,
+              writable: false
+            },
+            readonly: {
+              enumerable: true,
+              value: readonly,
+              writable: false
+            }
           })
         }
       }
@@ -235,7 +242,7 @@ describe('SensitiveParamFilter', () => {
       })
 
       it('preprends error type to the message', () => {
-        expect(output.message).toBe(`CustomError: ${inputMessage}`)
+        expect(output.message).toBe(inputMessage)
       })
 
       it('maintains non-sensitive, enumerable data in the output error', () => {
@@ -244,6 +251,11 @@ describe('SensitiveParamFilter', () => {
 
       it('does not maintain sensitive data in the output error', () => {
         expect(output.password).toBe('FILTERED')
+      })
+
+      it('maintains name and stack values', () => {
+        expect(output.name).toBe('CustomError')
+        expect(output.stack).toBe(input.stack)
       })
 
       it('converts to a plain Error', () => {
@@ -299,10 +311,6 @@ describe('SensitiveParamFilter', () => {
 
       it('converts to a plain Error', () => {
         expect(output.constructor).toBe(Error)
-      })
-
-      it('preprends error type to the message', () => {
-        expect(output.message).toBe(`SyntaxError: ${inputMessage}`)
       })
 
       it('maintains non-sensitive data in the output, including circular references', () => {

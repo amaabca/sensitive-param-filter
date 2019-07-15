@@ -56,8 +56,20 @@ class SensitiveParamFilter {
     if (id || id === 0) {
       return this.examinedObjects[id].copy
     }
-    const copy = new Error(`${input.constructor.name}: ${input.message}`)
-    copy.stack = input.stack
+
+    const copy = new Error(input.message)
+    Object.defineProperties(copy, {
+      name: {
+        configurable: true,
+        value: input.name,
+        writable: true
+      },
+      stack: {
+        configurable: true,
+        value: input.stack,
+        writable: true
+      }
+    })
     if (input.code) {
       copy.code = input.code
     }
