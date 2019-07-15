@@ -61,11 +61,13 @@ class SensitiveParamFilter {
     Object.defineProperties(copy, {
       name: {
         configurable: true,
+        enumerable: false,
         value: input.name,
         writable: true
       },
       stack: {
         configurable: true,
+        enumerable: false,
         value: input.stack,
         writable: true
       }
