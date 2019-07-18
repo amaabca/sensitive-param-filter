@@ -1,4 +1,4 @@
-/* eslint-disable max-lines, max-statements */
+/* eslint-disable max-len, max-lines */
 
 const { SensitiveParamFilter } = require('../src')
 
