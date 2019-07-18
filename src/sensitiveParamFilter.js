@@ -15,7 +15,7 @@ class SensitiveParamFilter {
     this.paramRegex = constructParamRegex(args[0] || DEFAULT_PARAMS)
     this.replacement = args[1] || DEFAULT_REPLACEMENT
     this.whitelistRegex = constructWhitelistRegex(args[2])
-    this.objectIdKey = generateRandomString(32)
+    this.objectIdKey = generateRandomString()
     this.examinedObjects = null
   }
 
