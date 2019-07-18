@@ -1,4 +1,4 @@
-/* eslint-disable max-lines, max-statements */
+/* eslint-disable max-len, max-lines */
 
 const { SensitiveParamFilter } = require('../src')
 
@@ -37,14 +37,16 @@ describe('SensitiveParamFilter', () => {
   describe('filter()', () => {
     const paramList = ['password', 'auth', 'PrIvAtE', 'credit_card']
     const replacement = 'FILTERED'
-    const paramFilter = new SensitiveParamFilter(paramList, replacement)
+    const whitelist = ['authentic']
+    const paramFilter = new SensitiveParamFilter(paramList, replacement, whitelist)
 
     describe('filtering a plain JS object', () => {
       const input = {
         Authorization: 'Bearer somedatatoken',
         body: {
           'Private-Data': 'somesecretstuff',
-          info: '{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }'
+          info: '{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }',
+          notes: 'Use https://login.example.com?username=jon.smith&password=qwerty/?authentic=true to login.'
         },
         method: 'POST',
         numRetries: 6,
@@ -70,7 +72,8 @@ describe('SensitiveParamFilter', () => {
         expect(input.Authorization).toBe('Bearer somedatatoken')
         expect(input.method).toBe('POST')
         expect(input.body['Private-Data']).toBe('somesecretstuff')
-        expect(input.body.info).toBe('{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }') // eslint-disable-line max-len
+        expect(input.body.info).toBe('{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }')
+        expect(input.body.notes).toBe('Use https://login.example.com?username=jon.smith&password=qwerty/?authentic=true to login.')
         expect(input.body.parent).toBe(input)
         expect(input.numRetries).toBe(6)
       })
@@ -99,6 +102,10 @@ describe('SensitiveParamFilter', () => {
         expect(outputInfoObject.first_name).toBe('Bob')
         expect(outputInfoObject.last_name).toBe('Bobbington')
         expect(outputInfoObject.amount).toBe(4)
+      })
+
+      it('filters out url params in query strings while maintaining non-sensitive data', () => {
+        expect(output.body.notes).toBe('Use https://login.example.com?username=jon.smith&password=FILTERED/?authentic=true to login.')
       })
     })
 

@@ -6,7 +6,8 @@ const {
 const {
   constructParamRegex,
   constructWhitelistRegex,
-  generateRandomString
+  generateRandomString,
+  parseUrlParams
 } = require('./helpers')
 
 class SensitiveParamFilter {
@@ -14,7 +15,7 @@ class SensitiveParamFilter {
     this.paramRegex = constructParamRegex(args[0] || DEFAULT_PARAMS)
     this.replacement = args[1] || DEFAULT_REPLACEMENT
     this.whitelistRegex = constructWhitelistRegex(args[2])
-    this.objectIdKey = generateRandomString(32)
+    this.objectIdKey = generateRandomString()
     this.examinedObjects = null
   }
 
@@ -47,7 +48,19 @@ class SensitiveParamFilter {
       const filtered = this.recursiveFilter(parsed)
       return JSON.stringify(filtered)
     } catch (error) {
-      return input
+      const parsedUrlParams = parseUrlParams(input)
+      let filtered = ''
+      parsedUrlParams.forEach((result) => {
+        const { key, value } = result
+        if (!key) {
+          filtered += value
+        } else if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
+          filtered += `${key}=${this.replacement}`
+        } else {
+          filtered += `${key}=${value}`
+        }
+      })
+      return filtered
     }
   }
 
@@ -119,9 +132,7 @@ class SensitiveParamFilter {
 
   recursivelyFilterAttributes(copy) {
     for (const key in copy) {
-      if (this.whitelistRegex.test(key)) {
-        copy[key] = this.recursiveFilter(copy[key])
-      } else if (this.paramRegex.test(key)) {
+      if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
         copy[key] = this.replacement
       } else {
         copy[key] = this.recursiveFilter(copy[key])
