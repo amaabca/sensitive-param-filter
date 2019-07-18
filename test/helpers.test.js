@@ -72,24 +72,23 @@ describe('helpers', () => {
   describe('parseUrlParams()', () => {
     it('parses urls embedded in strings', () => {
       const parsedUrlParams = parseUrlParams('Product link: www.spfshoppingcartsite.com?product_id=432543538&color=yellow&size=small')
-      expect(parsedUrlParams).toHaveLength(7)
+      expect(parsedUrlParams).toHaveLength(6)
 
-      expect(parsedUrlParams[0]).toEqual('Product link: www.spfshoppingcartsite.com?')
+      expect(parsedUrlParams[0]).toMatchObject({ key: null, value: 'Product link: www.spfshoppingcartsite.com?' })
       expect(parsedUrlParams[1]).toMatchObject({ key: 'product_id', value: '432543538' })
-      expect(parsedUrlParams[2]).toEqual('&')
+      expect(parsedUrlParams[2]).toMatchObject({ key: null, value: '&' })
       expect(parsedUrlParams[3]).toMatchObject({ key: 'color', value: 'yellow' })
-      expect(parsedUrlParams[4]).toEqual('&')
+      expect(parsedUrlParams[4]).toMatchObject({ key: null, value: '&' })
       expect(parsedUrlParams[5]).toMatchObject({ key: 'size', value: 'small' })
-      expect(parsedUrlParams[6]).toEqual('')
     })
 
     it('partially parses malformed urls', () => {
       const parsedUrlParams = parseUrlParams('www.example.com?#/blarg/key/name=bob&/smith/password?&qwerty')
       expect(parsedUrlParams).toHaveLength(3)
 
-      expect(parsedUrlParams[0]).toEqual('www.example.com?#/blarg/key/')
+      expect(parsedUrlParams[0]).toEqual({ key: null, value: 'www.example.com?#/blarg/key/' })
       expect(parsedUrlParams[1]).toMatchObject({ key: 'name', value: 'bob' })
-      expect(parsedUrlParams[2]).toEqual('&/smith/password?&qwerty')
+      expect(parsedUrlParams[2]).toEqual({ key: null, value: '&/smith/password?&qwerty' })
     })
   })
 })

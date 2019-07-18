@@ -14,7 +14,7 @@ const constructParamRegex = (params) => {
 const constructWhitelistRegex = (whitelist) => {
   if (whitelist && whitelist.length) {
     const whitelistRegexGroups = whitelist.map((entry) => `^(${entry})$`)
-    return new RegExp(`${whitelistRegexGroups.join('|')}`)
+    return new RegExp(whitelistRegexGroups.join('|'))
   }
   return { test: () => false }
 }
@@ -22,22 +22,34 @@ const constructWhitelistRegex = (whitelist) => {
 const generateRandomString = () => crypto.randomBytes(32).toString('hex')
 
 const parseUrlParams = (input) => {
-  const segmentedString = []
+  const segments = []
   let previousEndIndex = 0
   urlParamRegex.lastIndex = 0
+
   let match = urlParamRegex.exec(input)
   while (match) {
     const { 0: text, index } = match
-    segmentedString.push(input.slice(previousEndIndex, index + 1))
+
+    segments.push({
+      key: null,
+      value: input.slice(previousEndIndex, index + 1)
+    })
     previousEndIndex = index + text.length
-    segmentedString.push({
+    segments.push({
       key: text.slice(1, text.indexOf('=')),
       value: text.slice(text.indexOf('=') + 1, text.length)
     })
     match = urlParamRegex.exec(input)
   }
-  segmentedString.push(input.slice(previousEndIndex, input.length))
-  return segmentedString
+
+  const lastSegment = input.slice(previousEndIndex, input.length)
+  if (lastSegment.length > 0) {
+    segments.push({
+      key: null,
+      value: lastSegment
+    })
+  }
+  return segments
 }
 
 module.exports = {

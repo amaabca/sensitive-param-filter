@@ -50,16 +50,14 @@ class SensitiveParamFilter {
     } catch (error) {
       const parsedUrlParams = parseUrlParams(input)
       let filtered = ''
-      parsedUrlParams.forEach((result, index) => {
-        if (index % 2 === 0) {
-          filtered += result
+      parsedUrlParams.forEach((result) => {
+        const { key, value } = result
+        if (!key) {
+          filtered += value
+        } else if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
+          filtered += `${key}=${this.replacement}`
         } else {
-          const { key, value } = result
-          if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
-            filtered += `${key}=${this.replacement}`
-          } else {
-            filtered += `${key}=${value}`
-          }
+          filtered += `${key}=${value}`
         }
       })
       return filtered
