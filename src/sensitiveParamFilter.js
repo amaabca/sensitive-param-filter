@@ -55,9 +55,7 @@ class SensitiveParamFilter {
           filtered += result
         } else {
           const { key, value } = result
-          if (this.whitelistRegex.test(key)) {
-            filtered += `${key}=${value}`
-          } else if (this.paramRegex.test(key)) {
+          if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
             filtered += `${key}=${this.replacement}`
           } else {
             filtered += `${key}=${value}`
@@ -136,9 +134,7 @@ class SensitiveParamFilter {
 
   recursivelyFilterAttributes(copy) {
     for (const key in copy) {
-      if (this.whitelistRegex.test(key)) {
-        copy[key] = this.recursiveFilter(copy[key])
-      } else if (this.paramRegex.test(key)) {
+      if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
         copy[key] = this.replacement
       } else {
         copy[key] = this.recursiveFilter(copy[key])
