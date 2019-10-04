@@ -8,11 +8,11 @@ The defaults provided with sensitive-param-filter should work well for most appl
 
 Install sensitive-param-filter to your project via either npm:
 
-`npm install sensitive-param-filter`
+`npm install @amaabca/sensitive-param-filter`
 
 or yarn:
 
-`yarn add sensitive-param-filter`
+`yarn add @amaabca/sensitive-param-filter`
 
 ## Usage
 
