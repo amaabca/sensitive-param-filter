@@ -19,7 +19,7 @@ or yarn:
 ## Usage
 
 ```js
-const { SensitiveParamFilter } = require('sensitive-param-filter')
+const { SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
 const paramFilter = new SensitiveParamFilter()
 const rawObject = {
   Authorization: 'Bearer somedatatoken',
@@ -57,7 +57,7 @@ Key matching is done in a case-insensitive, partial-macthing manner (that is, if
 ### Options
 
 ```js
-const { SPFDefaultParams, SensitiveParamFilter } = require('sensitive-param-filter')
+const { SPFDefaultParams, SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
 const filter = new SensitiveParamFilter({
   params: SPFDefaultParams.concat(['data', 'email']),
   replacement: '***',
