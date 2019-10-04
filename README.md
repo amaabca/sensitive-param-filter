@@ -75,5 +75,4 @@ The default keys that are filtered are:
 See the [license](LICENSE).
 
 We welcome contributions.
-Please follow our [PR Template](.github/PULL_REQUEST_TEMPLATE.md) when opening a pull request.
-Understand that it may take several days for your PR to be reviewed (in particular if you open it on a weekend).
+See [contributing](CONTRIBUTING.md).
