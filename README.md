@@ -1,6 +1,6 @@
 # Sensitive Param Filter
 
-`sensitive-param-filter` is a zero-dependency (in production) package designed to filter sensitive values from JavaScript objects.
+`sensitive-param-filter` is a zero-dependency package designed to filter sensitive values from JavaScript objects.
 This package can be used to scrub logs, filer data before outputting to a UI, etc.
 The defaults provided with sensitive-param-filter should work well for most applications.
 
