@@ -3,8 +3,8 @@
 Please follow the appropriate template when opening an issue or pull request:
 
  * [PR Template](.github/PULL_REQUEST_TEMPLATE.md)
- * [Bug Report Template](.github/ISSUE_TEMPLATES/bug_report.md)
- * [Feature Request Template](.github/ISSUE_TEMPLATES/feature_request.md)
+ * [Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.md)
+ * [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.md)
 
 Understand that it may take several days for your contribution to be reviewed (in particular if you open it on a weekend).
 
