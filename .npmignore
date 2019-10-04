@@ -1,0 +1,11 @@
+node_modules
+coverage
+test
+.github
+
+.vscode
+.eslintrc.json
+.travis.yml
+CONTRIBUTING.md
+yarn-error.log
+yarn.lock
