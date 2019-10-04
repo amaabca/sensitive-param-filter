@@ -1,10 +1,20 @@
 {
   "name": "sensitive-param-filter",
   "version": "0.3.0",
-  "description": "Recursively filter sensitive parameters from JS objects",
+  "description": "A JS package for filtering sensitive data (parameters, keys) from a variety of JS objects",
   "main": "src/index.js",
   "author": "Alberta Motor Association",
   "license": "MIT",
+  "keywords": [
+    "sensitive",
+    "filter",
+    "security"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amaabca/sensitive-param-filter.git"
+  },
+  "homepage": "https://github.com/amaabca/sensitive-param-filter",
   "devDependencies": {
     "eslint": "^5.13.0",
     "jest": "^24.1.0"
