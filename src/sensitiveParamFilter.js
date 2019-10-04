@@ -11,10 +11,10 @@ const {
 } = require('./helpers')
 
 class SensitiveParamFilter {
-  constructor(...args) {
-    this.paramRegex = constructParamRegex(args[0] || DEFAULT_PARAMS)
-    this.replacement = args[1] || DEFAULT_REPLACEMENT
-    this.whitelistRegex = constructWhitelistRegex(args[2])
+  constructor(args = {}) {
+    this.paramRegex = constructParamRegex(args.params || DEFAULT_PARAMS)
+    this.replacement = args.replacement || DEFAULT_REPLACEMENT
+    this.whitelistRegex = constructWhitelistRegex(args.whitelist)
     this.objectIdKey = generateRandomString()
     this.examinedObjects = null
   }

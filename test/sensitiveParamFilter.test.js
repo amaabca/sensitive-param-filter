@@ -14,6 +14,7 @@ describe('SensitiveParamFilter', () => {
     it('uses default values when no arguments are given', () => {
       const paramFilter = new SensitiveParamFilter()
       const output = paramFilter.filter(input)
+
       expect(output.auth).toBe('FILTERED')
       expect(output.data).toBe('data')
       expect(output.moredata).toBe('moredata')
@@ -21,24 +22,24 @@ describe('SensitiveParamFilter', () => {
     })
 
     it('uses arguments when they are provided', () => {
-      const paramFilter = new SensitiveParamFilter(['data'], '***', ['moredata'])
+      const paramFilter = new SensitiveParamFilter({
+        params: ['data'],
+        replacement: '***',
+        whitelist: ['moredata']
+      })
       const output = paramFilter.filter(input)
+
       expect(output.auth).toBe('auth')
       expect(output.data).toBe('***')
       expect(output.moredata).toBe('moredata')
       expect(output.pass).toBe('pass')
     })
-
-    it('throws an error when no params are provided', () => {
-      expect(() => new SensitiveParamFilter([])).toThrow()
-    })
   })
 
   describe('filter()', () => {
-    const paramList = ['password', 'auth', 'PrIvAtE', 'credit_card']
-    const replacement = 'FILTERED'
+    const params = ['password', 'auth', 'PrIvAtE', 'credit_card']
     const whitelist = ['authentic']
-    const paramFilter = new SensitiveParamFilter(paramList, replacement, whitelist)
+    const paramFilter = new SensitiveParamFilter({ params, whitelist })
 
     describe('filtering a plain JS object', () => {
       const input = {
