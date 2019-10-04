@@ -19,6 +19,26 @@ const constructWhitelistRegex = (whitelist) => {
   return { test: () => false }
 }
 
+const findUniqueMatches = (input, regularExpression) => {
+  const matches = []
+  const uniqueMatches = {}
+
+  let match = regularExpression.exec(input)
+  while (match) {
+    const { 0: text } = match
+
+    if (!uniqueMatches[text]) {
+      matches.push(text)
+      uniqueMatches[text] = true
+    }
+
+    match = urlParamRegex.exec(input)
+  }
+
+  matches.sort()
+  return matches
+}
+
 const generateRandomString = () => crypto.randomBytes(32).toString('hex')
 
 const parseUrlParams = (input) => {
@@ -55,6 +75,7 @@ const parseUrlParams = (input) => {
 module.exports = {
   constructParamRegex,
   constructWhitelistRegex,
+  findUniqueMatches,
   generateRandomString,
   parseUrlParams
 }

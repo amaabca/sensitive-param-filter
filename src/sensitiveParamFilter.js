@@ -6,6 +6,7 @@ const {
 const {
   constructParamRegex,
   constructWhitelistRegex,
+  findUniqueMatches,
   generateRandomString,
   parseUrlParams
 } = require('./helpers')
@@ -14,7 +15,9 @@ class SensitiveParamFilter {
   constructor(args = {}) {
     this.paramRegex = constructParamRegex(args.params || DEFAULT_PARAMS)
     this.replacement = args.replacement || DEFAULT_REPLACEMENT
+    this.strictStringFiltering = args.strictStringFiltering || false
     this.whitelistRegex = constructWhitelistRegex(args.whitelist)
+
     this.objectIdKey = generateRandomString()
     this.examinedObjects = null
   }
@@ -48,20 +51,39 @@ class SensitiveParamFilter {
       const filtered = this.recursiveFilter(parsed)
       return JSON.stringify(filtered)
     } catch (error) {
-      const parsedUrlParams = parseUrlParams(input)
-      let filtered = ''
-      parsedUrlParams.forEach((result) => {
-        const { key, value } = result
-        if (!key) {
-          filtered += value
-        } else if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
-          filtered += `${key}=${this.replacement}`
-        } else {
-          filtered += `${key}=${value}`
-        }
-      })
-      return filtered
+      return this.filterUrlParams(input)
     }
+  }
+
+  filterUrlParams(input) {
+    const parsedUrlParams = parseUrlParams(input)
+    let filtered = ''
+    parsedUrlParams.forEach((result) => {
+      const { key } = result
+      let { value } = result
+
+      if (this.strictStringFiltering) {
+        value = this.strictlyFilterString(value)
+      }
+
+      if (!key) {
+        filtered += value
+      } else if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
+        filtered += `${key}=${this.replacement}`
+      } else {
+        filtered += `${key}=${value}`
+      }
+    })
+    return filtered
+  }
+
+  strictlyFilterString(input) {
+    const strippedInput = input.replace(this.whitelistRegex, '')
+    const matches = findUniqueMatches(strippedInput, this.paramRegex)
+    if (matches.length) {
+      return `${this.replacement} -> ${matches.join(', ')}`
+    }
+    return input
   }
 
   filterError(input) {
