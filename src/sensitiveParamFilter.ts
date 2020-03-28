@@ -1,17 +1,16 @@
-const {
-  DEFAULT_PARAMS,
-  DEFAULT_REPLACEMENT
-} = require('./defaults')
-
-const {
-  constructParamRegex,
-  constructWhitelistRegex,
-  generateRandomString,
-  parseUrlParams
-} = require('./helpers')
+interface SensitiveParamFilter {
+  params: any
+  replacement: any
+  whitelist: any
+}
 
 class SensitiveParamFilter {
-  constructor(args = {}) {
+  paramRegex: RegExp
+  replacement: any
+  whitelistRegex: RegExp | { test: () => boolean }
+  objectIdKey: any
+  examinedObjects: any
+  constructor(args = {} as SensitiveParamFilter) {
     this.paramRegex = constructParamRegex(args.params || DEFAULT_PARAMS)
     this.replacement = args.replacement || DEFAULT_REPLACEMENT
     this.whitelistRegex = constructWhitelistRegex(args.whitelist)
@@ -85,9 +84,10 @@ class SensitiveParamFilter {
         writable: true
       }
     })
-    if (input.code) {
-      copy.code = input.code
-    }
+    // TODO:
+    // if (input.code) {
+    //   copy.code = input.code
+    // }
 
     for (const key in input) { // eslint-disable-line guard-for-in
       copy[key] = input[key]

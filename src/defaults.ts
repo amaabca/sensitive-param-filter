@@ -12,8 +12,3 @@ const DEFAULT_PARAMS = [
 ]
 
 const DEFAULT_REPLACEMENT = 'FILTERED'
-
-module.exports = {
-  DEFAULT_PARAMS,
-  DEFAULT_REPLACEMENT
-}
