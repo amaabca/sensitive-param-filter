@@ -1,15 +1,25 @@
 interface SensitiveParamFilter {
-  params: any
-  replacement: any
-  whitelist: any
+  params: string[]
+  replacement: string
+  whitelist: string[]
+}
+
+interface ExaminedObjects {
+  copy: any
+  original: any
+}
+
+class SpfError extends Error {
+  code: any
 }
 
 class SensitiveParamFilter {
   paramRegex: RegExp
-  replacement: any
+  replacement: string
   whitelistRegex: RegExp | { test: () => boolean }
-  objectIdKey: any
-  examinedObjects: any
+  objectIdKey: string
+  examinedObjects: ExaminedObjects[]
+
   constructor(args = {} as SensitiveParamFilter) {
     this.paramRegex = constructParamRegex(args.params || DEFAULT_PARAMS)
     this.replacement = args.replacement || DEFAULT_REPLACEMENT
@@ -69,7 +79,7 @@ class SensitiveParamFilter {
       return this.examinedObjects[id].copy
     }
 
-    const copy = new Error(input.message)
+    const copy = new SpfError(input.message)
     Object.defineProperties(copy, {
       name: {
         configurable: true,
@@ -84,10 +94,9 @@ class SensitiveParamFilter {
         writable: true
       }
     })
-    // TODO:
-    // if (input.code) {
-    //   copy.code = input.code
-    // }
+    if (input.code) {
+      copy.code = input.code
+    }
 
     for (const key in input) { // eslint-disable-line guard-for-in
       copy[key] = input[key]
