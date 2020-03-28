@@ -2,7 +2,7 @@
   "name": "@amaabca/sensitive-param-filter",
   "version": "1.0.4",
   "description": "A package for filtering sensitive data (parameters, keys) from a variety of JS objects",
-  "main": "src/index.js",
+  "main": "src/index.ts",
   "author": "Alberta Motor Association",
   "license": "MIT",
   "keywords": [
@@ -16,8 +16,15 @@
   },
   "homepage": "https://github.com/amaabca/sensitive-param-filter",
   "devDependencies": {
+    "@types/jest": "^25.1.4",
+    "@typescript-eslint/eslint-plugin": "^2.25.0",
+    "@typescript-eslint/parser": "^2.25.0",
     "eslint": "^5.13.0",
-    "jest": "^24.1.0"
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^25.2.3",
+    "prettier": "^2.0.2",
+    "ts-jest": "^25.2.1"
   },
   "resolutions": {
     "eslint-utils": "^1.4.2",
@@ -43,7 +50,7 @@
       }
     },
     "testMatch": [
-      "**/*.test.js"
+      "**/*.test.ts"
     ]
   },
   "dependencies": {

@@ -1,3 +1,15 @@
+import {
+  DEFAULT_PARAMS,
+  DEFAULT_REPLACEMENT
+} from './defaults'
+
+import {
+  constructParamRegex,
+  constructWhitelistRegex,
+  generateRandomString,
+  parseUrlParams
+} from './helpers'
+
 interface SensitiveParamFilter {
   params: string[]
   replacement: string
@@ -156,4 +168,4 @@ class SensitiveParamFilter {
   }
 }
 
-module.exports = SensitiveParamFilter
+export default SensitiveParamFilter
