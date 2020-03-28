@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "moduleResolution": "node",
+    "outDir": "./built",
+    "lib": ["ES6"]
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}
