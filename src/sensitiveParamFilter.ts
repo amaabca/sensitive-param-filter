@@ -10,29 +10,24 @@ import {
   parseUrlParams
 } from './helpers'
 
-interface SensitiveParamFilter {
-  params: string[]
-  replacement: string
-  whitelist: string[]
-}
-
-interface ExaminedObjects {
-  copy: any
-  original: any
-}
+import { ExaminedObjects, SpfInterface, WhiteListRegex } from './interfaces'
 
 class SpfError extends Error {
-  code: any
+  code: string
 }
 
 class SensitiveParamFilter {
-  paramRegex: RegExp
-  replacement: string
-  whitelistRegex: RegExp | { test: () => boolean }
-  objectIdKey: string
   examinedObjects: ExaminedObjects[]
 
-  constructor(args = {} as SensitiveParamFilter) {
+  objectIdKey: string
+
+  paramRegex: RegExp
+
+  replacement: string
+
+  whitelistRegex: RegExp | WhiteListRegex
+
+  constructor(args = {} as SpfInterface) {
     this.paramRegex = constructParamRegex(args.params || DEFAULT_PARAMS)
     this.replacement = args.replacement || DEFAULT_REPLACEMENT
     this.whitelistRegex = constructWhitelistRegex(args.whitelist)
@@ -40,14 +35,14 @@ class SensitiveParamFilter {
     this.examinedObjects = null
   }
 
-  filter(inputObject) {
+  filter(inputObject): any {
     this.examinedObjects = []
     const output = this.recursiveFilter(inputObject)
     this.cleanupIdKeys()
     return output
   }
 
-  recursiveFilter(input) {
+  recursiveFilter(input: any): any {
     if (!input || typeof input === 'number' || typeof input === 'boolean') {
       return input
     } else if (typeof input === 'string' || input instanceof String) {
@@ -63,7 +58,7 @@ class SensitiveParamFilter {
     return null
   }
 
-  filterString(input) {
+  filterString(input: string): string {
     try {
       const parsed = JSON.parse(input)
       const filtered = this.recursiveFilter(parsed)
@@ -85,7 +80,7 @@ class SensitiveParamFilter {
     }
   }
 
-  filterError(input) {
+  filterError(input: Error): SpfError {
     const id = input[this.objectIdKey]
     if (id || id === 0) {
       return this.examinedObjects[id].copy
@@ -118,7 +113,7 @@ class SensitiveParamFilter {
     return copy
   }
 
-  filterObject(input) {
+  filterObject(input: object): object {
     const id = input[this.objectIdKey]
     if (id || id === 0) {
       return this.examinedObjects[id].copy
@@ -129,7 +124,7 @@ class SensitiveParamFilter {
     return copy
   }
 
-  filterArray(input) {
+  filterArray(input: Array<any>): Array<any> {
     const id = input[this.objectIdKey]
     if (id || id === 0) {
       return this.examinedObjects[id].copy
@@ -142,7 +137,7 @@ class SensitiveParamFilter {
     return copy
   }
 
-  saveCopy(original, copy) {
+  saveCopy(original: string, copy: string): void {
     const id = this.examinedObjects.length
     original[this.objectIdKey] = id
     this.examinedObjects.push({
@@ -151,7 +146,7 @@ class SensitiveParamFilter {
     })
   }
 
-  recursivelyFilterAttributes(copy) {
+  recursivelyFilterAttributes(copy: object): void {
     for (const key in copy) {
       if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
         copy[key] = this.replacement
@@ -161,7 +156,7 @@ class SensitiveParamFilter {
     }
   }
 
-  cleanupIdKeys() {
+  cleanupIdKeys(): void {
     for (const examinedObject of this.examinedObjects) {
       Reflect.deleteProperty(examinedObject.original, this.objectIdKey)
     }
