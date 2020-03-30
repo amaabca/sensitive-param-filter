@@ -21,3 +21,7 @@ Understand that it may take several days for your contribution to be reviewed (i
 * `yarn install` installs development dependencies
 * `yarn test` runs the test suite using [jest](https://github.com/facebook/jest)
 * `yarn lint` ensures your code matches our standards via [eslint](https://github.com/eslint/eslint)
+
+#### Publishing
+
+For maintainers, use `yarn publish` (ensure `master` is checked out) to publish new versions to `npm`.
