@@ -2,6 +2,7 @@ node_modules
 coverage
 test
 .github
+.publish-config
 
 .vscode
 .eslintrc.json

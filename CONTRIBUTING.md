@@ -24,4 +24,7 @@ Understand that it may take several days for your contribution to be reviewed (i
 
 #### Publishing
 
-For maintainers, use `yarn publish` (ensure `master` is checked out) to publish new versions to `npm`.
+`sensitive-param-filter` is published to both `GitHub Packages` and `npm`. Ensure you are authenticated with both:
+* [GitHub Packages](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-npm-for-use-with-github-packages#authenticating-to-github-packages)
+* [npm](https://docs.npmjs.com/cli/adduser.html)
+Use `yarn release` (ensure `master` is checked out) to publish new versions.
