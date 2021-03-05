@@ -417,5 +417,13 @@ describe('SensitiveParamFilter', () => {
         expect(output).toBeNull()
       })
     })
+
+    describe('filtering large integers in strings', () => {
+      it('returns the same value without rounding it', () => {
+        const bigInt = '987654321987654321'
+        const output = paramFilter.filter(bigInt)
+        expect(output).toEqual(bigInt)
+      })
+    })
   })
 })
