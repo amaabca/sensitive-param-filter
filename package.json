@@ -1,6 +1,6 @@
 {
   "name": "@amaabca/sensitive-param-filter",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "A package for filtering sensitive data (parameters, keys) from a variety of JS objects",
   "main": "src/index.js",
   "author": "Alberta Motor Association",
@@ -16,8 +16,8 @@
   },
   "homepage": "https://github.com/amaabca/sensitive-param-filter",
   "devDependencies": {
-    "eslint": "^7.27.0",
-    "jest": "^27.0.4"
+    "eslint": "7.32.0",
+    "jest": "27.1.1"
   },
   "scripts": {
     "lint": "eslint ./src ./test",
