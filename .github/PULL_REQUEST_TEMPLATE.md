@@ -6,7 +6,7 @@
 
 **PR Review Checklist**
 
-* [ ] I have passing tests run via `yarn test` with a 100% coverage threshold
-* [ ] I have updated the version in `package.json`
-* [ ] I have updated any relevant documentation in `README.md`, `.github`, etc.
-* [ ] I have not included any secret values or links to internal AMA URLs in my commits or PR message
+- [ ] I have passing tests run via `npm run test` with a 100% coverage threshold
+- [ ] I have updated the version in `package.json`
+- [ ] I have updated any relevant documentation in `README.md`, `.github`, etc.
+- [ ] I have not included any secret values or links to internal AMA URLs in my commits or PR message

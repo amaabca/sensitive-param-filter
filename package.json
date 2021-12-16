@@ -16,17 +16,12 @@
   },
   "homepage": "https://github.com/amaabca/sensitive-param-filter",
   "devDependencies": {
-    "eslint": "7.32.0",
-    "jest": "27.1.1"
+    "eslint": "8.4.1",
+    "jest": "27.4.5"
   },
   "scripts": {
     "lint": "eslint ./src ./test",
-    "pretest": "yarn lint",
-    "postrelease:github": "rm .npmrc",
-    "postrelease:npm": "rm .npmrc",
-    "release": "yarn release:github && yarn release:npm",
-    "release:github": "cp .publish-config/github.npmrc .npmrc && npm publish",
-    "release:npm": "cp .publish-config/npm.npmrc .npmrc && npm publish",
+    "pretest": "npm run lint",
     "test": "jest --coverage"
   },
   "jest": {
