@@ -17,10 +17,10 @@ jobs:
           name: artifacts
           path: src/
 
-  publish-package:
+  publish-package-to-github:
     runs-on: macos-latest
     needs: install
-    name: publish to github packages and npm
+    name: publish to github packages
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -37,6 +37,19 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-package-to-npm:
+    runs-on: macos-latest
+    needs: install
+    name: publish to npm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download built artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: artifacts
+          path: src
       - uses: actions/setup-node@v2
         with:
           node-version: '14.x'
