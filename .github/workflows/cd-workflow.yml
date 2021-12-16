@@ -1,0 +1,47 @@
+name: Deploy to Github Packages
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  install:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: npm install
+        run: npm install
+      - uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: src/
+
+  publish-package:
+    runs-on: macos-latest
+    needs: install
+    name: publish to github packages and npm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download built artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: artifacts
+          path: src
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Publish to Github Packages
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
