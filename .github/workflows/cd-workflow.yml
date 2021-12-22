@@ -10,6 +10,8 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install correct npm version 8
+        run: npm -g install npm@8
       - name: npm install
         run: npm install
       - uses: actions/upload-artifact@v2
@@ -33,6 +35,8 @@ jobs:
         with:
           node-version: '14.x'
           registry-url: 'https://npm.pkg.github.com'
+      - name: Install correct npm version 8
+        run: npm -g install npm@8
       - name: Publish to Github Packages
         run: npm publish
         env:
@@ -54,6 +58,8 @@ jobs:
         with:
           node-version: '14.x'
           registry-url: 'https://registry.npmjs.org'
+      - name: Install correct npm version 8
+        run: npm -g install npm@8
       - name: Publish to NPM
         run: npm publish
         env:
