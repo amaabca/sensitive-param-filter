@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/amaabca/sensitive-param-filter",
   "devDependencies": {
-    "eslint": "8.4.1",
+    "eslint": "8.5.0",
     "jest": "27.4.5"
   },
   "scripts": {
