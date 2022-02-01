@@ -8,7 +8,8 @@ describe('SensitiveParamFilter', () => {
       auth: 'auth',
       data: 'data',
       moredata: 'moredata',
-      pass: 'pass'
+      pass: 'pass',
+      someFunction: () => {} // eslint-disable-line no-empty-function
     }
 
     it('uses default values when no arguments are given', () => {
@@ -19,10 +20,12 @@ describe('SensitiveParamFilter', () => {
       expect(output.data).toBe('data')
       expect(output.moredata).toBe('moredata')
       expect(output.pass).toBe('FILTERED')
+      expect(output.someFunction).toBe('FILTERED')
     })
 
     it('uses arguments when they are provided', () => {
       const paramFilter = new SensitiveParamFilter({
+        filterUnknown: false,
         params: ['data'],
         replacement: '***',
         whitelist: ['moredata']
@@ -33,6 +36,7 @@ describe('SensitiveParamFilter', () => {
       expect(output.data).toBe('***')
       expect(output.moredata).toBe('moredata')
       expect(output.pass).toBe('pass')
+      expect(output.someFunction).toBe(input.someFunction)
     })
   })
 
@@ -402,19 +406,6 @@ describe('SensitiveParamFilter', () => {
 
         expect(outputIndex3Object.amount).toBe(9.75)
         expect(outputIndex3Object.credit_card_number).toBe('FILTERED')
-      })
-    })
-
-    describe('filtering functions', () => {
-      const input = () => {} // eslint-disable-line no-empty-function
-
-      let output = null
-      beforeEach(() => {
-        output = paramFilter.filter(input)
-      })
-
-      it('returns null', () => {
-        expect(output).toBeNull()
       })
     })
 
