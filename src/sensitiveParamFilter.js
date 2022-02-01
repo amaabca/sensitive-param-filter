@@ -12,6 +12,7 @@ const {
 
 class SensitiveParamFilter {
   constructor(args = {}) {
+    this.filterUnknown = args.filterUnknown || true
     this.paramRegex = constructParamRegex(args.params || DEFAULT_PARAMS)
     this.replacement = args.replacement || DEFAULT_REPLACEMENT
     this.whitelistRegex = constructWhitelistRegex(args.whitelist)
@@ -48,7 +49,10 @@ class SensitiveParamFilter {
       return this.filterObject(input)
     }
 
-    return null
+    if (this.filterUnknown) {
+      return this.replacement
+    }
+    return input
   }
 
   filterString(input) {
