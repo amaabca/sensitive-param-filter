@@ -49,21 +49,27 @@ Key matching is done in a case-insensitive, partial-macthing manner (that is, if
 
  * Does not modify input objects
  * Performs a deep copy of the input object (note that booleans, numbers, and strings - which are immutable - are technically copied by reference)
- * Does not copy functions
+ * Can be configued to filter out or leave "unexpected" objects (such as functions)
  * Handles circular references
  * Filters valid JSON strings
  * Filters valid and malformed URL query params
+ * Filters Errors, Arrays, Maps, Sets, and simple objects
 
 ### Options
 
 ```js
 const { SPFDefaultParams, SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
 const filter = new SensitiveParamFilter({
+  filterUnknown: false,
   params: SPFDefaultParams.concat(['data', 'email']),
   replacement: '***',
   whitelist: ['authentic', 'encryption_standard']
 })
 ```
+
+* **filterUnknown:**
+Indicates whether "unexpected" objects (such as functions) should be filtered or returned as-is.
+Defaults to `true`
 
 * **params:**
 An array of string params to filter.
@@ -72,7 +78,7 @@ Setting this option overwrites the default array (`SPFDefaultParams`).
 
 * **replacement:**
 The object to replace filtered values with.
-By default, replacement is `'FILTERED'`.
+Defaults to `'FILTERED'`.
 
 * **whitelist:**
 An array of strings to exclude from filtering.

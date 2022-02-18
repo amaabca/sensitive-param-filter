@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install correct npm version 8
-        run: npm -g install npm@8
+        run: npm -g install npm@8.3.1
       - name: npm install
         run: npm install
       - uses: actions/upload-artifact@v2

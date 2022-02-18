@@ -12,6 +12,11 @@ const {
 
 class SensitiveParamFilter {
   constructor(args = {}) {
+    if (args.filterUnknown === false) {
+      this.filterUnknown = false
+    } else {
+      this.filterUnknown = true
+    }
     this.paramRegex = constructParamRegex(args.params || DEFAULT_PARAMS)
     this.replacement = args.replacement || DEFAULT_REPLACEMENT
     this.whitelistRegex = constructWhitelistRegex(args.whitelist)
@@ -27,6 +32,11 @@ class SensitiveParamFilter {
   }
 
   recursiveFilter(input) {
+    const id = input[this.objectIdKey]
+    if (id || id === 0) {
+      return this.examinedObjects[id].copy
+    }
+
     if (!input || typeof input === 'number' || typeof input === 'boolean') {
       return input
     } else if (typeof input === 'string' || input instanceof String) {
@@ -35,11 +45,18 @@ class SensitiveParamFilter {
       return this.filterError(input)
     } else if (Array.isArray(input)) {
       return this.filterArray(input)
+    } else if (input instanceof Map) {
+      return this.filterMap(input)
+    } else if (input instanceof Set) {
+      return this.filterSet(input)
     } else if (typeof input === 'object') {
       return this.filterObject(input)
     }
 
-    return null
+    if (this.filterUnknown) {
+      return this.replacement
+    }
+    return input
   }
 
   filterString(input) {
@@ -68,11 +85,6 @@ class SensitiveParamFilter {
   }
 
   filterError(input) {
-    const id = input[this.objectIdKey]
-    if (id || id === 0) {
-      return this.examinedObjects[id].copy
-    }
-
     const copy = new Error(input.message)
     Object.defineProperties(copy, {
       name: {
@@ -101,10 +113,6 @@ class SensitiveParamFilter {
   }
 
   filterObject(input) {
-    const id = input[this.objectIdKey]
-    if (id || id === 0) {
-      return this.examinedObjects[id].copy
-    }
     const copy = { ...input }
     this.saveCopy(input, copy)
     this.recursivelyFilterAttributes(copy)
@@ -112,15 +120,44 @@ class SensitiveParamFilter {
   }
 
   filterArray(input) {
-    const id = input[this.objectIdKey]
-    if (id || id === 0) {
-      return this.examinedObjects[id].copy
-    }
     const copy = []
     this.saveCopy(input, copy)
     for (const item of input) {
       copy.push(this.recursiveFilter(item))
     }
+    return copy
+  }
+
+  filterMap(input) {
+    const copy = new Map()
+    const iterator = input.entries()
+    let result = iterator.next()
+    while (!result.done) {
+      const [key, value] = result.value
+      if (typeof key === 'string' || key instanceof String) {
+        if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
+          copy.set(key, this.replacement)
+        } else {
+          copy.set(key, this.recursiveFilter(value))
+        }
+      } else {
+        copy.set(this.recursiveFilter(key), this.recursiveFilter(value))
+      }
+      result = iterator.next()
+    }
+    this.saveCopy(input, copy)
+    return copy
+  }
+
+  filterSet(input) {
+    const copy = new Set()
+    const iterator = input.values()
+    let result = iterator.next()
+    while (!result.done) {
+      copy.add(this.recursiveFilter(result.value))
+      result = iterator.next()
+    }
+    this.saveCopy(input, copy)
     return copy
   }
 
