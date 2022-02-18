@@ -409,6 +409,53 @@ describe('SensitiveParamFilter', () => {
       })
     })
 
+    describe('filtering Maps and Sets', () => {
+      const complexKey = { privateStuff: 'aKeyThing', public: 'anotherKeyThing' }
+      const complexValue = { privateStuff: 'aValueThing', public: complexKey }
+      const input = {
+        map: new Map([
+          ['someNumber', 1234567],
+          ['password', 'aSecurePassword'],
+          [complexKey, complexValue]
+        ]),
+        set: new Set(['apple', 'banana', complexKey])
+      }
+
+      let output = null
+      beforeEach(() => {
+        output = paramFilter.filter(input)
+      })
+
+      it('does not modify the original object', () => {
+        expect(input.map.get('someNumber')).toBe(1234567)
+        expect(input.map.get('password')).toBe('aSecurePassword')
+        expect(input.map.get(complexKey)).toBe(complexValue)
+
+        expect(input.set).toContain('apple')
+        expect(input.set).toContain('banana')
+        expect(input.set).toContain(complexKey)
+      })
+
+      it('maintains non-sensitive data in the output object', () => {
+        expect(output.map.get('someNumber')).toBe(1234567)
+
+        expect(output.set).toContain('apple')
+        expect(output.set).toContain('banana')
+      })
+
+      it('filters out object keys in a case-insensitive, partial-matching manner', () => {
+        const filteredComplexKey = { privateStuff: 'FILTERED', public: 'anotherKeyThing' }
+        const filteredComplexValue = { privateStuff: 'FILTERED', public: filteredComplexKey }
+
+        expect(output.map.get('password')).toBe('FILTERED')
+        expect(output.map.get(complexKey)).toBeUndefined()
+        expect(Array.from(output.map)).toContainEqual([filteredComplexKey, filteredComplexValue])
+
+        expect(output.set).not.toContain(complexKey)
+        expect(output.set).toContainEqual({ privateStuff: 'FILTERED', public: 'anotherKeyThing' })
+      })
+    })
+
     describe('filtering large integers in strings', () => {
       it('returns the same value without rounding it', () => {
         const bigInt = '987654321987654321'
