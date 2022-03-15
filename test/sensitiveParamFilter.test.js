@@ -93,6 +93,7 @@ describe('SensitiveParamFilter', () => {
         expect(output.method).toBe('POST')
         expect(output.body.parent).toBe(output)
         expect(output.numRetries).toBe(6)
+        expect(output.stageVariables).toBe(null)
       })
 
       it('filters out object keys in a case-insensitive, partial-matching manner', () => {
