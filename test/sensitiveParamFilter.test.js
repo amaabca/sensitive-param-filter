@@ -56,6 +56,7 @@ describe('SensitiveParamFilter', () => {
         method: 'POST',
         numRetries: 6,
         password: 'asecurepassword1234',
+        stageVariables: null,
         username: 'bob.bobbington'
       }
       input.body.parent = input
@@ -81,6 +82,7 @@ describe('SensitiveParamFilter', () => {
         expect(input.body.notes).toBe('Use https://login.example.com?username=jon.smith&password=qwerty/?authentic=true to login.')
         expect(input.body.parent).toBe(input)
         expect(input.numRetries).toBe(6)
+        expect(input.stageVariables).toBe(null)
       })
 
       it('maintains non-sensitive data in the output object, including circular references', () => {
@@ -91,6 +93,7 @@ describe('SensitiveParamFilter', () => {
         expect(output.method).toBe('POST')
         expect(output.body.parent).toBe(output)
         expect(output.numRetries).toBe(6)
+        expect(output.stageVariables).toBe(null)
       })
 
       it('filters out object keys in a case-insensitive, partial-matching manner', () => {

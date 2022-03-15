@@ -32,14 +32,15 @@ class SensitiveParamFilter {
   }
 
   recursiveFilter(input) {
+    if (!input || typeof input === 'number' || typeof input === 'boolean') {
+      return input
+    }
     const id = input[this.objectIdKey]
     if (id || id === 0) {
       return this.examinedObjects[id].copy
     }
 
-    if (!input || typeof input === 'number' || typeof input === 'boolean') {
-      return input
-    } else if (typeof input === 'string' || input instanceof String) {
+    if (typeof input === 'string' || input instanceof String) {
       return this.filterString(input)
     } else if (input instanceof Error) {
       return this.filterError(input)
