@@ -1,8 +1,8 @@
-const crypto = require('crypto')
-
 // See https://tools.ietf.org/html/rfc1738#section-2.2 and https://tools.ietf.org/html/rfc3986#section-2.2
 const urlDelimiters = '#;/?:@&'
 const urlParamRegex = new RegExp(`([${urlDelimiters}][^${urlDelimiters}=\\s]+=[^${urlDelimiters}=\\s]*)`, 'g')
+
+const circularReferenceKey = '__spf_1337_c1rc1ul4r_r3f3r3nc3_k3y__'
 
 const constructParamRegex = (params) => {
   if (!params || !params.length) {
@@ -19,7 +19,6 @@ const constructWhitelistRegex = (whitelist) => {
   return { test: () => false }
 }
 
-const generateRandomString = () => crypto.randomBytes(32).toString('hex')
 
 const parseUrlParams = (input) => {
   const segments = []
@@ -53,8 +52,8 @@ const parseUrlParams = (input) => {
 }
 
 module.exports = {
+  circularReferenceKey,
   constructParamRegex,
   constructWhitelistRegex,
-  generateRandomString,
   parseUrlParams
 }

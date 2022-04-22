@@ -6,7 +6,7 @@ const {
 const {
   constructParamRegex,
   constructWhitelistRegex,
-  generateRandomString,
+  circularReferenceKey,
   parseUrlParams
 } = require('./helpers')
 
@@ -20,7 +20,6 @@ class SensitiveParamFilter {
     this.paramRegex = constructParamRegex(args.params || DEFAULT_PARAMS)
     this.replacement = args.replacement || DEFAULT_REPLACEMENT
     this.whitelistRegex = constructWhitelistRegex(args.whitelist)
-    this.objectIdKey = generateRandomString()
     this.examinedObjects = null
   }
 
@@ -35,7 +34,7 @@ class SensitiveParamFilter {
     if (!input || typeof input === 'number' || typeof input === 'boolean') {
       return input
     }
-    const id = input[this.objectIdKey]
+    const id = input[circularReferenceKey]
     if (id || id === 0) {
       return this.examinedObjects[id].copy
     }
@@ -164,7 +163,7 @@ class SensitiveParamFilter {
 
   saveCopy(original, copy) {
     const id = this.examinedObjects.length
-    original[this.objectIdKey] = id
+    original[circularReferenceKey] = id
     this.examinedObjects.push({
       copy,
       original
@@ -183,7 +182,7 @@ class SensitiveParamFilter {
 
   cleanupIdKeys() {
     for (const examinedObject of this.examinedObjects) {
-      Reflect.deleteProperty(examinedObject.original, this.objectIdKey)
+      Reflect.deleteProperty(examinedObject.original, circularReferenceKey)
     }
   }
 }

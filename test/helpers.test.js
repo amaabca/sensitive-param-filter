@@ -3,7 +3,6 @@
 const {
   constructParamRegex,
   constructWhitelistRegex,
-  generateRandomString,
   parseUrlParams
 } = require('../src/helpers')
 
@@ -53,21 +52,6 @@ describe('helpers', () => {
       expect(regex.test('')).toBeFalsy()
       expect(regex.test(3)).toBeFalsy()
       expect(regex.test()).toBeFalsy()
-    })
-  })
-
-  describe('generateRandomString()', () => {
-    it('generates unique strings', () => {
-      const randomStringArray = []
-      while (randomStringArray.length < 100) {
-        randomStringArray.push(generateRandomString())
-      }
-
-      for (let firstIndex = 0; firstIndex < randomStringArray.length; firstIndex++) {
-        for (let secondIndex = firstIndex + 1; secondIndex < randomStringArray.length; secondIndex++) {
-          expect(randomStringArray[firstIndex]).not.toEqual(randomStringArray[secondIndex])
-        }
-      }
     })
   })
 
