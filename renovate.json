@@ -1,0 +1,23 @@
+{
+  "extends": ["config:base"],
+  "vulnerabilityAlerts": {
+    "groupName": "Security Vulnerabilities"
+  },
+  "packageRules": [
+    {
+      "groupName": "NodeJS Version",
+      "major": {
+        "enabled": false
+      },
+      "matchPackageNames": ["node"]
+    },
+    {
+      "enabled": true,
+      "excludePackageNames": ["node"],
+      "groupName": "All Dependencies",
+      "matchManagers": ["npm"],
+      "matchPackagePatterns": ["*"],
+      "separateMajorMinor": false
+    }
+  ]
+}
