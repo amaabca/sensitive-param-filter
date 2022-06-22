@@ -9,7 +9,7 @@ jobs:
   install:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install correct npm version 8
         run: npm -g install npm@8.3.1
       - name: npm install
@@ -25,7 +25,7 @@ jobs:
     name: publish to github packages
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download built artifact
         uses: actions/download-artifact@v2
         with:
@@ -48,7 +48,7 @@ jobs:
     name: publish to npm
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download built artifact
         uses: actions/download-artifact@v2
         with:
