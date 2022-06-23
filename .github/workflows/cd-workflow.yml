@@ -14,7 +14,7 @@ jobs:
         run: npm -g install npm@8.3.1
       - name: npm install
         run: npm install
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: artifacts
           path: src/
