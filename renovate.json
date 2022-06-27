@@ -13,9 +13,7 @@
     },
     {
       "enabled": true,
-      "excludePackageNames": ["node"],
       "groupName": "All Dependencies",
-      "matchManagers": ["npm"],
       "matchPackagePatterns": ["*"],
       "separateMajorMinor": false
     }
