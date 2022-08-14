@@ -9,12 +9,12 @@ jobs:
   install:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install correct npm version 8
         run: npm -g install npm@8.3.1
       - name: npm install
         run: npm install
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: artifacts
           path: src/
@@ -25,13 +25,13 @@ jobs:
     name: publish to github packages
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download built artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: artifacts
           path: src
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '14.x'
           registry-url: 'https://npm.pkg.github.com'
@@ -48,13 +48,13 @@ jobs:
     name: publish to npm
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download built artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: artifacts
           path: src
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '14.x'
           registry-url: 'https://registry.npmjs.org'
