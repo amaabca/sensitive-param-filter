@@ -30,6 +30,10 @@ class SensitiveParamFilter {
     return output
   }
 
+  shouldFilter (text) {
+    return !this.whitelistRegex.test(text) && this.paramRegex.test(text)
+  }
+
   recursiveFilter(input) {
     if (!input || typeof input === 'number' || typeof input === 'boolean') {
       return input
@@ -69,18 +73,24 @@ class SensitiveParamFilter {
       return JSON.stringify(filtered)
     } catch (error) {
       const parsedUrlParams = parseUrlParams(input)
-      let filtered = ''
-      parsedUrlParams.forEach((result) => {
-        const { key, value } = result
-        if (!key) {
-          filtered += value
-        } else if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
-          filtered += `${key}=${this.replacement}`
-        } else {
-          filtered += `${key}=${value}`
+
+      const filtered = parsedUrlParams.map(({ key, value }) => {
+        if (key == null) {
+          if (this.shouldFilter(value)) {
+            return this.replacement
+          }
+
+          return value
         }
+
+        if (this.shouldFilter(key)) {
+          return `${key}=${this.replacement}`
+        }
+
+        return `${key}=${value}`
       })
-      return filtered
+
+      return filtered.join('')
     }
   }
 
@@ -135,7 +145,7 @@ class SensitiveParamFilter {
     while (!result.done) {
       const [key, value] = result.value
       if (typeof key === 'string' || key instanceof String) {
-        if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
+        if (this.shouldFilter(key)) {
           copy.set(key, this.replacement)
         } else {
           copy.set(key, this.recursiveFilter(value))
@@ -172,7 +182,7 @@ class SensitiveParamFilter {
 
   recursivelyFilterAttributes(copy) {
     for (const key in copy) {
-      if (!this.whitelistRegex.test(key) && this.paramRegex.test(key)) {
+      if (this.shouldFilter(key)) {
         copy[key] = this.replacement
       } else {
         copy[key] = this.recursiveFilter(copy[key])

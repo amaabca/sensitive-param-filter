@@ -1,6 +1,6 @@
 {
   "name": "@amaabca/sensitive-param-filter",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "A package for filtering sensitive data (parameters, keys) from a variety of JS objects",
   "engines": {
     "npm": ">=8"
@@ -25,7 +25,8 @@
   "scripts": {
     "lint": "eslint ./src ./test",
     "pretest": "npm run lint",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "test:watch": "jest --watchAll=true --coverage=false"
   },
   "jest": {
     "collectCoverage": true,

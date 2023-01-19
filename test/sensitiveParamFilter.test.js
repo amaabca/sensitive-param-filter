@@ -48,6 +48,7 @@ describe('SensitiveParamFilter', () => {
     describe('filtering a plain JS object', () => {
       const input = {
         Authorization: 'Bearer somedatatoken',
+        _header: 'GET /some/items\\nAuthorization: Bearer someheadertoken',
         body: {
           'Private-Data': 'somesecretstuff',
           info: '{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }',
@@ -100,6 +101,7 @@ describe('SensitiveParamFilter', () => {
         expect(output.password).toBe('FILTERED')
         expect(output.Authorization).toBe('FILTERED')
         expect(output.body['Private-Data']).toBe('FILTERED')
+        expect(output._header).toBe('FILTERED')
       })
 
       it('filters out JSON keys (case-insensitive) and matches partials while maintaining non-sensitive data', () => {
