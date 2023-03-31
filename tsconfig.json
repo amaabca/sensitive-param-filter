@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "lib": ["es6"],
+    "module": "commonjs",
+    "noEmit": true,
+    "target": "es6",
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "strict": true
+  }
+}
