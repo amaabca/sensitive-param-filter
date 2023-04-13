@@ -1,10 +1,7 @@
 {
   "name": "@amaabca/sensitive-param-filter",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "A package for filtering sensitive data (parameters, keys) from a variety of JS objects",
-  "engines": {
-    "npm": ">=8"
-  },
   "main": "src/index.js",
   "author": "Alberta Motor Association",
   "license": "MIT",
