@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - ado-81920-typescript
 
 jobs:
   install:
@@ -45,6 +46,7 @@ jobs:
     runs-on: macos-latest
     needs: install
     name: publish to npm
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
