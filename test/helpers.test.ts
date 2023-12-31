@@ -1,11 +1,9 @@
-/* eslint-disable max-len */
-
-const { constructParamRegex, constructWhitelistRegex, parseUrlParams } = require('../src/helpers')
+import { constructFitleredKeyRegex, constructWhitelistRegex, parseUrlParams } from '../src/helpers'
 
 describe('helpers', () => {
-  describe('constructParamRegex()', () => {
-    it('constructs a case-insensitive regex when provided with a param array', () => {
-      const regex = constructParamRegex(['AUTH', 'bearer', 'Password', 'Token'])
+  describe('constructFitleredKeyRegex()', () => {
+    it('constructs a case-insensitive regex when provided with a key array', () => {
+      const regex = constructFitleredKeyRegex(['AUTH', 'bearer', 'Password', 'Token'])
 
       expect(regex.test('auth')).toBeTruthy()
       expect(regex.test('BEARER')).toBeTruthy()
@@ -17,9 +15,11 @@ describe('helpers', () => {
     })
 
     it('throws an error when provided with invalid params', () => {
-      expect(() => constructParamRegex()).toThrow()
-      expect(() => constructParamRegex([])).toThrow()
-      expect(() => constructParamRegex('Testing, testing, 1, 2, 3')).toThrow()
+      // @ts-expect-error testing error conditions
+      expect(() => constructFitleredKeyRegex()).toThrow()
+      expect(() => constructFitleredKeyRegex([])).toThrow()
+      // @ts-expect-error testing error conditions
+      expect(() => constructFitleredKeyRegex('Testing, testing, 1, 2, 3')).toThrow()
     })
   })
 
@@ -41,7 +41,9 @@ describe('helpers', () => {
 
       expect(regex.test('Safe string')).toBeFalsy()
       expect(regex.test('')).toBeFalsy()
+      // @ts-expect-error testing error conditions
       expect(regex.test(3)).toBeFalsy()
+      // @ts-expect-error testing error conditions
       expect(regex.test()).toBeFalsy()
     })
   })

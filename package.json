@@ -16,6 +16,7 @@
   },
   "homepage": "https://github.com/amaabca/sensitive-param-filter",
   "devDependencies": {
+    "@types/jest": "^29.5.11",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "dpdm": "^3.13.0",
     "eslint": "^8.56.0",
@@ -41,7 +42,7 @@
     ],
     "coverageDirectory": "coverage",
     "coveragePathIgnorePatterns": [
-      "**.fixture.ts"
+      ".*\\.fixture\\.ts"
     ],
     "coverageThreshold": {
       "global": {

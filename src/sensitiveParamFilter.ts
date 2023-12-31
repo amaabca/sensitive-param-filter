@@ -143,8 +143,7 @@ export class SensitiveParamFilter {
     return copy
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  private filterObject(input: Object) {
+  private filterObject(input: object) {
     const copy = { ...input }
     this.saveCopy(input, copy)
     this.recursivelyFilterAttributes(copy)
@@ -203,8 +202,7 @@ export class SensitiveParamFilter {
     })
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  private recursivelyFilterAttributes(copy: Object) {
+  private recursivelyFilterAttributes(copy: object) {
     for (const key in copy) {
       if (this.shouldFilter(key)) {
         // @ts-expect-error we're literally iterating through attributes, these will exist

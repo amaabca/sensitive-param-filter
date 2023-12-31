@@ -8,7 +8,7 @@ const urlParamRegex = new RegExp(
 export const circularReferenceKey = '__spf_1337_c1rc1ul4r_r3f3r3nc3_k3y__'
 
 export const constructFitleredKeyRegex = (filteredKeys: string[]) => {
-  if (filteredKeys == null || filteredKeys.length == null) {
+  if (filteredKeys?.length == null || filteredKeys.length == 0) {
     throw new Error('Provide an array of keys to filter.')
   }
   return new RegExp(filteredKeys.join('|'), 'i')
