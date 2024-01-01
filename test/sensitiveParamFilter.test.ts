@@ -1,6 +1,14 @@
-/* eslint-disable max-len, max-lines */
+/* eslint-disable max-len, max-lines, no-empty-function, @typescript-eslint/no-empty-function */
 
-import { SensitiveParamFilter } from "../src/"
+import {
+  CustomError,
+  PlainJsObject,
+  VeryUnusualClass,
+  keysToFilter,
+  plainJsInputObject,
+  whitelist,
+} from './sensitiveParamFilter.fixture'
+import { SensitiveParamFilter } from '../src/'
 
 describe('SensitiveParamFilter', () => {
   describe('#constructor()', () => {
@@ -9,7 +17,7 @@ describe('SensitiveParamFilter', () => {
       data: 'data',
       moredata: 'moredata',
       pass: 'pass',
-      someFunction: () => {}, // eslint-disable-line no-empty-function
+      someFunction: () => {},
     }
 
     it('uses default values when no arguments are given', () => {
@@ -41,43 +49,10 @@ describe('SensitiveParamFilter', () => {
   })
 
   describe('filter()', () => {
-    const keysToFilter = ['password', 'auth', 'PrIvAtE', 'credit_card']
-    const whitelist = ['authentic']
     const paramFilter = new SensitiveParamFilter({ keysToFilter, whitelist })
 
     describe('filtering a plain JS object', () => {
-      type PlainJsObject = {
-        Authorization: string,
-        _header: string,
-        body: {
-          'Private-Data': string,
-          info: string,
-          notes: string,
-          parent?: PlainJsObject,
-        },
-        method: string,
-        numRetries: number,
-        password: string,
-        stageVariables: null,
-        username: string,
-      }
-
-      const input: PlainJsObject = {
-        Authorization: 'Bearer somedatatoken',
-        _header: 'GET /some/items\\nAuthorization: Bearer someheadertoken',
-        body: {
-          'Private-Data': 'somesecretstuff',
-          info: '{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }',
-          notes:
-            'Use https://login.example.com?username=jon.smith&password=qwerty/?authentic=true to login.',
-        },
-        method: 'POST',
-        numRetries: 6,
-        password: 'asecurepassword1234',
-        stageVariables: null,
-        username: 'bob.bobbington',
-      }
-      input.body.parent = input
+      const input = plainJsInputObject
 
       const numInputKeys = Object.keys(input).length
       const numBodyKeys = Object.keys(input.body).length
@@ -143,32 +118,6 @@ describe('SensitiveParamFilter', () => {
     })
 
     describe('filtering a custom object with read-only and non-enumerable properties', () => {
-      class VeryUnusualClass {
-        public password: string
-        // @ts-expect-error created in constructor with Reflect.defineProperty()
-        public readonly: string
-        // @ts-expect-error created in constructor with Reflect.defineProperty()
-        public hidden: string
-
-        constructor() {
-          this.password = 'hunter12'
-          Reflect.defineProperty(this, 'readonly', {
-            enumerable: true,
-            value: 42,
-            writable: false,
-          })
-          Reflect.defineProperty(this, 'hidden', {
-            enumerable: false,
-            value: 'You cannot see me',
-            writable: true,
-          })
-        }
-
-        doSomething() {
-          return `${this.readonly} ${this.hidden}`
-        }
-      }
-
       const input = {
         message: 'hello',
         veryUnusualObject: new VeryUnusualClass(),
@@ -241,43 +190,12 @@ describe('SensitiveParamFilter', () => {
       const inputReadonly = 42
       const inputHidden = 'You cannot see me'
 
-      class CustomError extends Error {
-        public password: string
-        // @ts-expect-error created in constructor with Reflect.defineProperty()
-        public readonly: number
-        // @ts-expect-error created in constructor with Reflect.defineProperty()
-        public hidden: string
-
-        constructor(message: string, password: string, readonly: number, hidden: string) {
-          super(message)
-
-          this.password = password
-          Object.defineProperties(this, {
-            hidden: {
-              enumerable: false,
-              value: hidden,
-              writable: true,
-            },
-            name: {
-              enumerable: false,
-              value: this.constructor.name,
-              writable: false,
-            },
-            readonly: {
-              enumerable: true,
-              value: readonly,
-              writable: false,
-            },
-          })
-        }
-      }
-
       const input = new CustomError(inputMessage, inputPassword, inputReadonly, inputHidden)
       const inputKeyCount = Object.keys(input).length
       const inputType = typeof input
       const inputConstructor = input.constructor
 
-      let output: CustomError = input
+      let output = new CustomError('', '', 0, '')
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -388,63 +306,63 @@ describe('SensitiveParamFilter', () => {
     //   })
     // })
 
-    // describe('filtering nested arrays', () => {
-    //   const input = [
-    //     { Authorization: 'Bearer somedatatoken', method: 'GET', url: 'https://some.url.org' },
-    //     12345,
-    //     [{ password: 'qwery123456', username: 'alice.smith' }, 'Hello World'],
-    //     '{ "amount": 9.75, "credit_card_number": "4551201891449281" }',
-    //   ]
-    //   input[2].push(input)
+    describe('filtering nested arrays', () => {
+      const input = [
+        { Authorization: 'Bearer somedatatoken', method: 'GET', url: 'https://some.url.org' },
+        12345,
+        [{ password: 'qwery123456', username: 'alice.smith' }, 'Hello World'],
+        '{ "amount": 9.75, "credit_card_number": "4551201891449281" }',
+      ]
+      input[2].push(input)
 
-    //   const inputLength = input.length
-    //   const inputIndex2Length = input[2].length
+      const inputLength = input.length
+      const inputIndex2Length = input[2].length
 
-    //   let output = null
-    //   beforeEach(() => {
-    //     output = paramFilter.filter(input)
-    //   })
+      let output = null
+      beforeEach(() => {
+        output = paramFilter.filter(input)
+      })
 
-    //   it('does not modify the original object', () => {
-    //     expect(input.length).toBe(inputLength)
-    //     expect(input[2].length).toBe(inputIndex2Length)
+      it('does not modify the original object', () => {
+        expect(input.length).toBe(inputLength)
+        expect(input[2].length).toBe(inputIndex2Length)
 
-    //     expect(input[0].Authorization).toBe('Bearer somedatatoken')
-    //     expect(input[0].method).toBe('GET')
-    //     expect(input[0].url).toBe('https://some.url.org')
-    //     expect(input[1]).toBe(12345)
-    //     expect(input[2][0].password).toBe('qwery123456')
-    //     expect(input[2][0].username).toBe('alice.smith')
-    //     expect(input[2][1]).toBe('Hello World')
-    //     expect(input[2][2]).toBe(input)
-    //     expect(input[3]).toBe('{ "amount": 9.75, "credit_card_number": "4551201891449281" }')
-    //   })
+        expect(input[0].Authorization).toBe('Bearer somedatatoken')
+        expect(input[0].method).toBe('GET')
+        expect(input[0].url).toBe('https://some.url.org')
+        expect(input[1]).toBe(12345)
+        expect(input[2][0].password).toBe('qwery123456')
+        expect(input[2][0].username).toBe('alice.smith')
+        expect(input[2][1]).toBe('Hello World')
+        expect(input[2][2]).toBe(input)
+        expect(input[3]).toBe('{ "amount": 9.75, "credit_card_number": "4551201891449281" }')
+      })
 
-    //   it('maintains non-sensitive data in the output object, including circular references', () => {
-    //     expect(output.length).toBe(inputLength)
-    //     expect(output[2].length).toBe(inputIndex2Length)
+      it('maintains non-sensitive data in the output object, including circular references', () => {
+        expect(output.length).toBe(inputLength)
+        expect(output[2].length).toBe(inputIndex2Length)
 
-    //     expect(output[0].method).toBe('GET')
-    //     expect(output[0].url).toBe('https://some.url.org')
-    //     expect(output[1]).toBe(12345)
-    //     expect(output[2][0].username).toBe('alice.smith')
-    //     expect(output[2][1]).toBe('Hello World')
-    //     expect(output[2][2]).toBe(output)
-    //   })
+        expect(output[0].method).toBe('GET')
+        expect(output[0].url).toBe('https://some.url.org')
+        expect(output[1]).toBe(12345)
+        expect(output[2][0].username).toBe('alice.smith')
+        expect(output[2][1]).toBe('Hello World')
+        expect(output[2][2]).toBe(output)
+      })
 
-    //   it('filters out object keys in a case-insensitive, partial-matching manner', () => {
-    //     expect(output[0].Authorization).toBe('FILTERED')
-    //     expect(output[2][0].password).toBe('FILTERED')
-    //   })
+      it('filters out object keys in a case-insensitive, partial-matching manner', () => {
+        expect(output[0].Authorization).toBe('FILTERED')
+        expect(output[2][0].password).toBe('FILTERED')
+      })
 
-    //   it('filters out JSON keys and matches partials while maintaining non-sensitive data', () => {
-    //     const outputIndex3Object = JSON.parse(output[3])
-    //     expect(Object.keys(outputIndex3Object).length).toBe(2)
+      it('filters out JSON keys and matches partials while maintaining non-sensitive data', () => {
+        const outputIndex3Object = JSON.parse(output[3])
+        expect(Object.keys(outputIndex3Object).length).toBe(2)
 
-    //     expect(outputIndex3Object.amount).toBe(9.75)
-    //     expect(outputIndex3Object.credit_card_number).toBe('FILTERED')
-    //   })
-    // })
+        expect(outputIndex3Object.amount).toBe(9.75)
+        expect(outputIndex3Object.credit_card_number).toBe('FILTERED')
+      })
+    })
 
     // describe('filtering Maps and Sets', () => {
     //   const complexKey = { privateStuff: 'aKeyThing', public: 'anotherKeyThing' }
