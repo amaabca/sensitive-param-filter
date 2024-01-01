@@ -1,7 +1,9 @@
 export const keysToFilter = ['password', 'auth', 'PrIvAtE', 'credit_card']
 export const whitelist = ['authentic']
 
-export type PlainJsObject = {
+// -- filtering a plain JS object --
+
+type PlainJsObject = {
   Authorization: string
   _header: string
   body: {
@@ -34,6 +36,8 @@ export const plainJsInputObject: PlainJsObject = {
 }
 plainJsInputObject.body.parent = plainJsInputObject
 
+// -- filtering a custom object with read-only and non-enumerable properties --
+
 export class VeryUnusualClass {
   public password: string
 
@@ -61,6 +65,19 @@ export class VeryUnusualClass {
     return `${this.readonly} ${this.hidden}`
   }
 }
+
+// -- filtering errors with a code --
+
+export class ErrorWithCode extends Error {
+  public code: string
+
+  constructor(message: string, code: string) {
+    super(message)
+    this.code = code
+  }
+}
+
+// -- filtering a custom error with non-standard fields --
 
 export class CustomError extends Error {
   public password: string
@@ -93,4 +110,64 @@ export class CustomError extends Error {
       },
     })
   }
+}
+
+// -- filtering a JSON parse error --
+
+type SyntaxErrorWithFields = {
+  Authorization: string
+  customData: {
+    error: Error
+    info: string
+  }
+}
+
+let jsonParseError = new SyntaxError()
+try {
+  JSON.parse('This is not a JSON string.  Do not parse it.')
+} catch (error) {
+  if (error instanceof SyntaxError) {
+    jsonParseError = error
+  }
+}
+
+const customJsonParseError = jsonParseError as SyntaxError & SyntaxErrorWithFields
+customJsonParseError.Authorization = 'Username: Bob, Password: pa$$word'
+customJsonParseError.customData = {
+  error: customJsonParseError,
+  info: '{ "json": false, "veryPrivateInfo": "credentials" }',
+}
+export { customJsonParseError }
+
+// -- filtering nested arrays --
+
+type MixedArray = [
+  { Authorization: string; method: string; url: string },
+  number,
+  [{ password: string; username: string }, string, MixedArray],
+  string,
+]
+
+const mixedArrayInput: MixedArray = [
+  { Authorization: 'Bearer somedatatoken', method: 'GET', url: 'https://some.url.org' },
+  12345,
+  // @ts-expect-error using null as a placeholder
+  [{ password: 'qwery123456', username: 'alice.smith' }, 'Hello World', null],
+  '{ "amount": 9.75, "credit_card_number": "4551201891449281" }',
+]
+mixedArrayInput[2][2] = mixedArrayInput
+export { mixedArrayInput }
+
+// -- filtering Maps and Sets --
+
+export const complexKey = { privateStuff: 'aKeyThing', public: 'anotherKeyThing' }
+export const complexValue = { privateStuff: 'aValueThing', public: complexKey }
+
+export const mapAndSetInput = {
+  map: new Map<string | typeof complexKey, number | string | typeof complexValue>([
+    ['someNumber', 1234567],
+    ['password', 'aSecurePassword'],
+    [complexKey, complexValue],
+  ]),
+  set: new Set(['apple', 'banana', complexKey]),
 }

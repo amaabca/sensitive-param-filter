@@ -1,10 +1,15 @@
-/* eslint-disable max-len, max-lines, no-empty-function, @typescript-eslint/no-empty-function */
+/* eslint-disable max-lines, no-empty-function, @typescript-eslint/no-empty-function */
 
 import {
   CustomError,
-  PlainJsObject,
+  ErrorWithCode,
   VeryUnusualClass,
+  complexKey,
+  complexValue,
+  customJsonParseError,
   keysToFilter,
+  mapAndSetInput,
+  mixedArrayInput,
   plainJsInputObject,
   whitelist,
 } from './sensitiveParamFilter.fixture'
@@ -57,7 +62,7 @@ describe('SensitiveParamFilter', () => {
       const numInputKeys = Object.keys(input).length
       const numBodyKeys = Object.keys(input.body).length
 
-      let output: PlainJsObject = input
+      let output = input
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -165,24 +170,23 @@ describe('SensitiveParamFilter', () => {
       })
     })
 
-    // describe('filtering errors with a code', () => {
-    //   const input = new Error('Something broke')
-    //   input.code = 'ERR_BROKEN'
+    describe('filtering errors with a code', () => {
+      const input = new ErrorWithCode('Something broke', 'ERR_BROKEN')
 
-    //   let output = null
-    //   beforeEach(() => {
-    //     output = paramFilter.filter(input)
-    //   })
+      let output: ErrorWithCode = input
+      beforeEach(() => {
+        output = paramFilter.filter(input)
+      })
 
-    //   it('maintains the error code and type', () => {
-    //     expect(output).toBeInstanceOf(Error)
-    //     expect(output.code).toBe(input.code)
-    //   })
+      it('maintains the error code and type', () => {
+        expect(output).toBeInstanceOf(Error)
+        expect(output.code).toBe(input.code)
+      })
 
-    //   it('preprends error type to the message', () => {
-    //     expect(output.message).toBe(input.message)
-    //   })
-    // })
+      it('preprends error type to the message', () => {
+        expect(output.message).toBe(input.message)
+      })
+    })
 
     describe('filtering a custom error with non-standard fields', () => {
       const inputMessage = 'Super broken'
@@ -237,88 +241,67 @@ describe('SensitiveParamFilter', () => {
       })
     })
 
-    // describe('filtering a JSON parse error', () => {
-    //   let input = null
-    //   try {
-    //     JSON.parse('This is not a JSON string.  Do not parse it.')
-    //   } catch (error) {
-    //     input = error
-    //   }
-    //   input.Authorization = 'Username: Bob, Password: pa$$word'
-    //   input.customData = {
-    //     error: input,
-    //     info: '{ "json": false, "veryPrivateInfo": "credentials" }',
-    //   }
+    describe('filtering a JSON parse error', () => {
+      const input = customJsonParseError
 
-    //   const inputMessage = input.message
-    //   const inputStack = input.stack
-    //   const inputCode = input.code
+      const inputMessage = input.message
+      const inputStack = input.stack
 
-    //   const numInputKeys = Object.keys(input).length
-    //   const numCustomDataKeys = Object.keys(input.customData).length
-    //   const inputType = typeof input
-    //   const inputConstructor = input.constructor
+      const numInputKeys = Object.keys(input).length
+      const numCustomDataKeys = Object.keys(input.customData).length
+      const inputType = typeof input
+      const inputConstructor = input.constructor
 
-    //   let output = null
-    //   beforeEach(() => {
-    //     output = paramFilter.filter(input)
-    //   })
+      let output = input
+      beforeEach(() => {
+        output = paramFilter.filter(input)
+      })
 
-    //   it('does not modify the original error', () => {
-    //     expect(Object.keys(input).length).toBe(numInputKeys)
-    //     expect(Object.keys(input.customData).length).toBe(numCustomDataKeys)
-    //     expect(typeof input).toBe(inputType)
-    //     expect(input.constructor).toBe(inputConstructor)
+      it('does not modify the original error', () => {
+        expect(Object.keys(input).length).toBe(numInputKeys)
+        expect(Object.keys(input.customData).length).toBe(numCustomDataKeys)
+        expect(typeof input).toBe(inputType)
+        expect(input.constructor).toBe(inputConstructor)
 
-    //     expect(input.message).toBe(inputMessage)
-    //     expect(input.stack).toBe(inputStack)
-    //     expect(input.code).toBe(inputCode)
+        expect(input.message).toBe(inputMessage)
+        expect(input.stack).toBe(inputStack)
 
-    //     expect(input.Authorization).toBe('Username: Bob, Password: pa$$word')
-    //     expect(input.customData.info).toBe('{ "json": false, "veryPrivateInfo": "credentials" }')
-    //     expect(input.customData.error).toBe(input)
-    //   })
+        expect(input.Authorization).toBe('Username: Bob, Password: pa$$word')
+        expect(input.customData.info).toBe('{ "json": false, "veryPrivateInfo": "credentials" }')
+        expect(input.customData.error).toBe(input)
+      })
 
-    //   it('converts to a plain Error', () => {
-    //     expect(output.constructor).toBe(Error)
-    //   })
+      it('converts to a plain Error', () => {
+        expect(output.constructor).toBe(Error)
+      })
 
-    //   it('maintains non-sensitive data in the output, including circular references', () => {
-    //     expect(Object.keys(output).length).toBe(numInputKeys)
-    //     expect(typeof output).toBe(inputType)
+      it('maintains non-sensitive data in the output, including circular references', () => {
+        expect(Object.keys(output).length).toBe(numInputKeys)
+        expect(typeof output).toBe(inputType)
+        expect(output.stack).toBe(inputStack)
+        expect(output.customData.error).toBe(output)
+      })
 
-    //     expect(output.stack).toBe(inputStack)
-    //     expect(output.code).toBe(inputCode)
+      it('filters out error keys in a case-insensitive, partial-matching manner', () => {
+        expect(output.Authorization).toBe('FILTERED')
+      })
 
-    //     expect(output.customData.error).toBe(output)
-    //   })
+      it('filters out JSON keys (case-insensitive) and matches partials while maintaining non-sensitive data', () => {
+        const outputInfoObject = JSON.parse(output.customData.info)
+        expect(Object.keys(outputInfoObject).length).toBe(2)
 
-    //   it('filters out error keys in a case-insensitive, partial-matching manner', () => {
-    //     expect(output.Authorization).toBe('FILTERED')
-    //   })
-
-    //   it('filters out JSON keys (case-insensitive) and matches partials while maintaining non-sensitive data', () => {
-    //     const outputInfoObject = JSON.parse(output.customData.info)
-    //     expect(Object.keys(outputInfoObject).length).toBe(2)
-
-    //     expect(outputInfoObject.veryPrivateInfo).toBe('FILTERED')
-    //     expect(outputInfoObject.json).toBe(false)
-    //   })
-    // })
+        expect(outputInfoObject.veryPrivateInfo).toBe('FILTERED')
+        expect(outputInfoObject.json).toBe(false)
+      })
+    })
 
     describe('filtering nested arrays', () => {
-      const input = [
-        { Authorization: 'Bearer somedatatoken', method: 'GET', url: 'https://some.url.org' },
-        12345,
-        [{ password: 'qwery123456', username: 'alice.smith' }, 'Hello World'],
-        '{ "amount": 9.75, "credit_card_number": "4551201891449281" }',
-      ]
-      input[2].push(input)
+      const input = mixedArrayInput
 
       const inputLength = input.length
       const inputIndex2Length = input[2].length
 
-      let output = null
+      let output = input
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -364,59 +347,50 @@ describe('SensitiveParamFilter', () => {
       })
     })
 
-    // describe('filtering Maps and Sets', () => {
-    //   const complexKey = { privateStuff: 'aKeyThing', public: 'anotherKeyThing' }
-    //   const complexValue = { privateStuff: 'aValueThing', public: complexKey }
-    //   const input = {
-    //     map: new Map([
-    //       ['someNumber', 1234567],
-    //       ['password', 'aSecurePassword'],
-    //       [complexKey, complexValue],
-    //     ]),
-    //     set: new Set(['apple', 'banana', complexKey]),
-    //   }
+    describe('filtering Maps and Sets', () => {
+      const input = mapAndSetInput
 
-    //   let output = null
-    //   beforeEach(() => {
-    //     output = paramFilter.filter(input)
-    //   })
+      let output = input
+      beforeEach(() => {
+        output = paramFilter.filter(input)
+      })
 
-    //   it('does not modify the original object', () => {
-    //     expect(input.map.get('someNumber')).toBe(1234567)
-    //     expect(input.map.get('password')).toBe('aSecurePassword')
-    //     expect(input.map.get(complexKey)).toBe(complexValue)
+      it('does not modify the original object', () => {
+        expect(input.map.get('someNumber')).toBe(1234567)
+        expect(input.map.get('password')).toBe('aSecurePassword')
+        expect(input.map.get(complexKey)).toBe(complexValue)
 
-    //     expect(input.set).toContain('apple')
-    //     expect(input.set).toContain('banana')
-    //     expect(input.set).toContain(complexKey)
-    //   })
+        expect(input.set).toContain('apple')
+        expect(input.set).toContain('banana')
+        expect(input.set).toContain(complexKey)
+      })
 
-    //   it('maintains non-sensitive data in the output object', () => {
-    //     expect(output.map.get('someNumber')).toBe(1234567)
+      it('maintains non-sensitive data in the output object', () => {
+        expect(output.map.get('someNumber')).toBe(1234567)
 
-    //     expect(output.set).toContain('apple')
-    //     expect(output.set).toContain('banana')
-    //   })
+        expect(output.set).toContain('apple')
+        expect(output.set).toContain('banana')
+      })
 
-    //   it('filters out object keys in a case-insensitive, partial-matching manner', () => {
-    //     const filteredComplexKey = { privateStuff: 'FILTERED', public: 'anotherKeyThing' }
-    //     const filteredComplexValue = { privateStuff: 'FILTERED', public: filteredComplexKey }
+      it('filters out object keys in a case-insensitive, partial-matching manner', () => {
+        const filteredComplexKey = { privateStuff: 'FILTERED', public: 'anotherKeyThing' }
+        const filteredComplexValue = { privateStuff: 'FILTERED', public: filteredComplexKey }
 
-    //     expect(output.map.get('password')).toBe('FILTERED')
-    //     expect(output.map.get(complexKey)).toBeUndefined()
-    //     expect(Array.from(output.map)).toContainEqual([filteredComplexKey, filteredComplexValue])
+        expect(output.map.get('password')).toBe('FILTERED')
+        expect(output.map.get(complexKey)).toBeUndefined()
+        expect(Array.from(output.map)).toContainEqual([filteredComplexKey, filteredComplexValue])
 
-    //     expect(output.set).not.toContain(complexKey)
-    //     expect(output.set).toContainEqual({ privateStuff: 'FILTERED', public: 'anotherKeyThing' })
-    //   })
-    // })
+        expect(output.set).not.toContain(complexKey)
+        expect(output.set).toContainEqual({ privateStuff: 'FILTERED', public: 'anotherKeyThing' })
+      })
+    })
 
-    // describe('filtering large integers in strings', () => {
-    //   it('returns the same value without rounding it', () => {
-    //     const bigInt = '987654321987654321'
-    //     const output = paramFilter.filter(bigInt)
-    //     expect(output).toEqual(bigInt)
-    //   })
-    // })
+    describe('filtering large integers in strings', () => {
+      it('returns the same value without rounding it', () => {
+        const bigInt = '987654321987654321'
+        const output = paramFilter.filter(bigInt)
+        expect(output).toEqual(bigInt)
+      })
+    })
   })
 })
