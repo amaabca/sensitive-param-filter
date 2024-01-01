@@ -4,7 +4,7 @@
     "isolatedModules": true,
     "lib": ["es6"],
     "module": "commonjs",
-    "noEmit": true,
+    "outDir": "dist",
     "target": "es6",
     "allowJs": false,
     "allowSyntheticDefaultImports": true,

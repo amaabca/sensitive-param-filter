@@ -2,7 +2,7 @@
   "name": "@amaabca/sensitive-param-filter",
   "version": "1.2.8",
   "description": "A package for filtering sensitive data (parameters, keys) from a variety of JS objects",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "author": "Alberta Motor Association",
   "license": "MIT",
   "keywords": [
@@ -28,9 +28,9 @@
   "scripts": {
     "circular:check": "dpdm --exit-code circular:1 --warning false src/*",
     "compile": "tsc",
-    "format:check": "prettier --check .",
-    "format:fix": "prettier --write .",
-    "lint": "eslint ./src --max-warnings 0",
+    "format:check": "prettier --ignore-path .gitignore --check .",
+    "format:fix": "prettier --ignore-path .gitignore --write .",
+    "lint": "eslint ./src ./test --max-warnings 0",
     "test": "jest --coverage",
     "test:watch": "jest --watchAll=true --coverage=false",
     "validate": "npm run format:check && npm run lint && npm run compile && npm run test && npm run circular:check"
@@ -42,6 +42,7 @@
     ],
     "coverageDirectory": "coverage",
     "coveragePathIgnorePatterns": [
+      "dist",
       ".*\\.fixture\\.ts"
     ],
     "coverageThreshold": {
@@ -52,6 +53,9 @@
         "statements": 100
       }
     },
+    "modulePathIgnorePatterns": [
+      "dist"
+    ],
     "preset": "ts-jest"
   }
 }
