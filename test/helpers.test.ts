@@ -1,20 +1,9 @@
-/* eslint-disable max-len */
-
-const {
-  constructParamRegex,
-  constructWhitelistRegex,
-  parseUrlParams
-} = require('../src/helpers')
+import { constructFitleredKeyRegex, constructWhitelistRegex, parseUrlParams } from '../src/helpers'
 
 describe('helpers', () => {
-  describe('constructParamRegex()', () => {
-    it('constructs a case-insensitive regex when provided with a param array', () => {
-      const regex = constructParamRegex([
-        'AUTH',
-        'bearer',
-        'Password',
-        'Token'
-      ])
+  describe('constructFitleredKeyRegex()', () => {
+    it('constructs a case-insensitive regex when provided with a key array', () => {
+      const regex = constructFitleredKeyRegex(['AUTH', 'bearer', 'Password', 'Token'])
 
       expect(regex.test('auth')).toBeTruthy()
       expect(regex.test('BEARER')).toBeTruthy()
@@ -26,9 +15,11 @@ describe('helpers', () => {
     })
 
     it('throws an error when provided with invalid params', () => {
-      expect(() => constructParamRegex()).toThrow()
-      expect(() => constructParamRegex([])).toThrow()
-      expect(() => constructParamRegex('Testing, testing, 1, 2, 3')).toThrow()
+      // @ts-expect-error testing error conditions
+      expect(() => constructFitleredKeyRegex()).toThrow()
+      expect(() => constructFitleredKeyRegex([])).toThrow()
+      // @ts-expect-error testing error conditions
+      expect(() => constructFitleredKeyRegex('Testing, testing, 1, 2, 3')).toThrow()
     })
   })
 
@@ -50,17 +41,24 @@ describe('helpers', () => {
 
       expect(regex.test('Safe string')).toBeFalsy()
       expect(regex.test('')).toBeFalsy()
+      // @ts-expect-error testing error conditions
       expect(regex.test(3)).toBeFalsy()
+      // @ts-expect-error testing error conditions
       expect(regex.test()).toBeFalsy()
     })
   })
 
   describe('parseUrlParams()', () => {
     it('parses urls embedded in strings', () => {
-      const parsedUrlParams = parseUrlParams('Product link: www.spfshoppingcartsite.com?product_id=432543538&color=yellow&size=small')
+      const parsedUrlParams = parseUrlParams(
+        'Product link: www.spfshoppingcartsite.com?product_id=432543538&color=yellow&size=small',
+      )
       expect(parsedUrlParams).toHaveLength(6)
 
-      expect(parsedUrlParams[0]).toMatchObject({ key: null, value: 'Product link: www.spfshoppingcartsite.com?' })
+      expect(parsedUrlParams[0]).toMatchObject({
+        key: null,
+        value: 'Product link: www.spfshoppingcartsite.com?',
+      })
       expect(parsedUrlParams[1]).toMatchObject({ key: 'product_id', value: '432543538' })
       expect(parsedUrlParams[2]).toMatchObject({ key: null, value: '&' })
       expect(parsedUrlParams[3]).toMatchObject({ key: 'color', value: 'yellow' })
@@ -69,7 +67,9 @@ describe('helpers', () => {
     })
 
     it('partially parses malformed urls', () => {
-      const parsedUrlParams = parseUrlParams('www.example.com?#/blarg/key/name=bob&/smith/password?&qwerty')
+      const parsedUrlParams = parseUrlParams(
+        'www.example.com?#/blarg/key/name=bob&/smith/password?&qwerty',
+      )
       expect(parsedUrlParams).toHaveLength(3)
 
       expect(parsedUrlParams[0]).toEqual({ key: null, value: 'www.example.com?#/blarg/key/' })
