@@ -3,23 +3,17 @@
 [![Build Status](https://travis-ci.org/amaabca/sensitive-param-filter.svg?branch=master)](https://travis-ci.org/amaabca/sensitive-param-filter)
 
 `sensitive-param-filter` is a zero-dependency package designed to filter sensitive values from JavaScript objects.
-This package can be used to scrub logs, filer data before outputting to a UI, etc.
+This package can be used to scrub logs, filter data before outputting to a UI, etc.
 The defaults provided with sensitive-param-filter should work well for most applications.
 
 ## Installation
 
-Install sensitive-param-filter to your project via either npm:
-
 `npm install @amaabca/sensitive-param-filter`
-
-or yarn:
-
-`yarn add @amaabca/sensitive-param-filter`
 
 ## Usage
 
-```js
-const { SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
+```typescript
+import { SensitiveParamFilter } from '@amaabca/sensitive-param-filter'
 const paramFilter = new SensitiveParamFilter()
 const rawObject = {
   Authorization: 'Bearer somedatatoken',
@@ -43,12 +37,12 @@ const filteredObject = paramFilter.filter(rawObject)
 ### Details
 
 sensitive-param-filter examines keys to determine which values to filter.
-Key matching is done in a case-insensitive, partial-macthing manner (that is, if the param `AUTH` is provided, `Authorization`, `AUTHENTICATION`, etc. will be filtered).
+Partial matches and case-insensitive matches are filtered - if the key `AUTH` is provided, `Authorization`, `AUTHENTICATION`, etc. will be filtered.
 
 ### Key Features
 
 - Does not modify input objects
-- Performs a deep copy of the input object (note that booleans, numbers, and strings - which are immutable - are technically copied by reference)
+- Performs a deep copy of the input object
 - Can be configued to filter out or leave "unexpected" objects (such as functions)
 - Handles circular references
 - Filters valid JSON strings
@@ -57,11 +51,11 @@ Key matching is done in a case-insensitive, partial-macthing manner (that is, if
 
 ### Options
 
-```js
-const { SPFDefaultParams, SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
+```typescript
+import { SPFDefaultFilteredKeys, SensitiveParamFilter } from '@amaabca/sensitive-param-filter'
 const filter = new SensitiveParamFilter({
   filterUnknown: false,
-  params: SPFDefaultParams.concat(['data', 'email']),
+  keysToFilter: SPFDefaultFilteredKeys.concat(['data', 'email']),
   replacement: '***',
   whitelist: ['authentic', 'encryption_standard'],
 })
@@ -71,10 +65,10 @@ const filter = new SensitiveParamFilter({
   Indicates whether "unexpected" objects (such as functions) should be filtered or returned as-is.
   Defaults to `true`
 
-- **params:**
-  An array of string params to filter.
+- **keysToFilter:**
+  An array of string keys to filter.
   These entries will be combined into a regex that is used by sensitive-param-filter.
-  Setting this option overwrites the default array (`SPFDefaultParams`).
+  Setting this option overwrites the default array (`SPFDefaultFilteredKeys`).
 
 - **replacement:**
   The object to replace filtered values with.
@@ -87,7 +81,7 @@ const filter = new SensitiveParamFilter({
 
 ## Default Values
 
-See [defaults](src/defaults.js).
+See [defaults](src/defaults.ts).
 Note that all of these values can be overridden via the options.
 
 The default keys that are filtered are:
@@ -102,11 +96,3 @@ The default keys that are filtered are:
 - pass
 - secret
 - token
-
-## License & Contributing
-
-`sensitive-param-filter` uses the MIT license.
-See the [license](LICENSE).
-
-We welcome contributions.
-See [contributing](CONTRIBUTING.md).
