@@ -6,59 +6,12 @@ on:
       - master
 
 jobs:
-  install:
-    runs-on: macos-latest
+  publish:
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: npm install
-        run: npm install
-      - name: Upload built artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifacts
-          path: src/
-
-  publish-package-to-github:
-    runs-on: macos-latest
-    needs: install
-    name: publish to github packages
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Download built artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: artifacts
-          path: src
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://npm.pkg.github.com'
-      - name: Publish to Github Packages
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  publish-package-to-npm:
-    runs-on: macos-latest
-    needs: install
-    name: publish to npm
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Download built artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: artifacts
-          path: src
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Publish to NPM
-        run: npm publish
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install
+      - run: npm run compile
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

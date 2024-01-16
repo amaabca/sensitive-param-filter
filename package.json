@@ -1,20 +1,22 @@
 {
-  "name": "@amaabca/sensitive-param-filter",
+  "name": "sensitive-param-filter",
   "version": "2.0.0",
-  "description": "A package for filtering sensitive data (parameters, keys) from a variety of JS objects",
+  "description": "A package for filtering sensitive data from any object - best used to sanitize logs.",
   "main": "dist/index.js",
-  "author": "Alberta Motor Association",
+  "author": "zjullion",
   "license": "MIT",
   "keywords": [
     "sensitive",
     "filter",
-    "security"
+    "sanitize",
+    "security",
+    "logging"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/amaabca/sensitive-param-filter.git"
+    "url": "https://github.com/zjullion/sensitive-param-filter.git"
   },
-  "homepage": "https://github.com/amaabca/sensitive-param-filter",
+  "homepage": "https://github.com/zjullion/sensitive-param-filter",
   "devDependencies": {
     "@types/jest": "^29.5.11",
     "@typescript-eslint/eslint-plugin": "^5.57.0",

@@ -2,8 +2,6 @@
 name: Feature request
 about: Suugest a new feature for sensitive-param-filter
 title: '[FEATURE]:'
-labels: ''
-assignees: ''
 ---
 
 **Describe the feature:**

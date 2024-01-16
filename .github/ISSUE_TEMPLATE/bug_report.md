@@ -2,8 +2,6 @@
 name: Bug report
 about: Describe a problem with sensitive-param-filter
 title: '[BUG]:'
-labels: ''
-assignees: ''
 ---
 
 **Describe the bug:**
