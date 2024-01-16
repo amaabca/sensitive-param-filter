@@ -9,9 +9,14 @@ jobs:
   publish:
     steps:
       - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - uses: actions/setup-node@v3
-      - run: npm install
-      - run: npm run compile
+        with:
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm build
       - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_NPM }}

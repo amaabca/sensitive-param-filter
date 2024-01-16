@@ -3,8 +3,15 @@
   "version": "2.0.0",
   "description": "A package for filtering sensitive data from any object - best used to sanitize logs.",
   "main": "dist/index.js",
+  "files": [
+    "dist/**/*"
+  ],
   "author": "zjullion",
   "license": "MIT",
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=7"
+  },
   "keywords": [
     "sensitive",
     "filter",
@@ -19,7 +26,7 @@
   "homepage": "https://github.com/zjullion/sensitive-param-filter",
   "devDependencies": {
     "@types/jest": "^29.5.11",
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/eslint-plugin": "^6",
     "dpdm": "^3.13.0",
     "eslint": "^8.56.0",
     "jest": "^29.5.0",
@@ -28,14 +35,14 @@
     "typescript": "^5.0.3"
   },
   "scripts": {
+    "build": "rm -rf dist && tsc --project tsconfig.build.json",
     "circular:check": "dpdm --exit-code circular:1 --warning false src/*",
-    "compile": "tsc",
     "format:check": "prettier --ignore-path .gitignore --check .",
     "format:fix": "prettier --ignore-path .gitignore --write .",
     "lint": "eslint ./src ./test --max-warnings 0",
     "test": "jest --coverage",
     "test:watch": "jest --watchAll=true --coverage=false",
-    "validate": "npm run format:check && npm run lint && npm run compile && npm run test && npm run circular:check"
+    "validate": "pnpm format:check && pnpm lint && pnpm tsc && pnpm test && pnpm circular:check"
   },
   "jest": {
     "collectCoverage": true,
