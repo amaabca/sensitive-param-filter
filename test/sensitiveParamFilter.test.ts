@@ -1,6 +1,19 @@
-/* eslint-disable max-len, max-lines */
+/* eslint-disable max-lines, no-empty-function, @typescript-eslint/no-empty-function */
 
-const { SensitiveParamFilter } = require('../src')
+import {
+  CustomError,
+  ErrorWithCode,
+  VeryUnusualClass,
+  complexKey,
+  complexValue,
+  customJsonParseError,
+  keysToFilter,
+  mapAndSetInput,
+  mixedArrayInput,
+  plainJsInputObject,
+  whitelist,
+} from './sensitiveParamFilter.fixture'
+import { SensitiveParamFilter } from '../src/'
 
 describe('SensitiveParamFilter', () => {
   describe('#constructor()', () => {
@@ -9,7 +22,7 @@ describe('SensitiveParamFilter', () => {
       data: 'data',
       moredata: 'moredata',
       pass: 'pass',
-      someFunction: () => {} // eslint-disable-line no-empty-function
+      someFunction: () => {},
     }
 
     it('uses default values when no arguments are given', () => {
@@ -26,9 +39,9 @@ describe('SensitiveParamFilter', () => {
     it('uses arguments when they are provided', () => {
       const paramFilter = new SensitiveParamFilter({
         filterUnknown: false,
-        params: ['data'],
+        keysToFilter: ['data'],
         replacement: '***',
-        whitelist: ['moredata']
+        whitelist: ['moredata'],
       })
       const output = paramFilter.filter(input)
 
@@ -41,31 +54,15 @@ describe('SensitiveParamFilter', () => {
   })
 
   describe('filter()', () => {
-    const params = ['password', 'auth', 'PrIvAtE', 'credit_card']
-    const whitelist = ['authentic']
-    const paramFilter = new SensitiveParamFilter({ params, whitelist })
+    const paramFilter = new SensitiveParamFilter({ keysToFilter, whitelist })
 
     describe('filtering a plain JS object', () => {
-      const input = {
-        Authorization: 'Bearer somedatatoken',
-        _header: 'GET /some/items\\nAuthorization: Bearer someheadertoken',
-        body: {
-          'Private-Data': 'somesecretstuff',
-          info: '{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }',
-          notes: 'Use https://login.example.com?username=jon.smith&password=qwerty/?authentic=true to login.'
-        },
-        method: 'POST',
-        numRetries: 6,
-        password: 'asecurepassword1234',
-        stageVariables: null,
-        username: 'bob.bobbington'
-      }
-      input.body.parent = input
+      const input = plainJsInputObject
 
       const numInputKeys = Object.keys(input).length
       const numBodyKeys = Object.keys(input.body).length
 
-      let output = null
+      let output = input
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -79,8 +76,12 @@ describe('SensitiveParamFilter', () => {
         expect(input.Authorization).toBe('Bearer somedatatoken')
         expect(input.method).toBe('POST')
         expect(input.body['Private-Data']).toBe('somesecretstuff')
-        expect(input.body.info).toBe('{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }')
-        expect(input.body.notes).toBe('Use https://login.example.com?username=jon.smith&password=qwerty/?authentic=true to login.')
+        expect(input.body.info).toBe(
+          '{ "first_name": "Bob", "last_name": "Bobbington", "PASSWORD": "asecurepassword1234", "amount": 4 }',
+        )
+        expect(input.body.notes).toBe(
+          'Use https://login.example.com?username=jon.smith&password=qwerty/?authentic=true to login.',
+        )
         expect(input.body.parent).toBe(input)
         expect(input.numRetries).toBe(6)
         expect(input.stageVariables).toBe(null)
@@ -115,34 +116,16 @@ describe('SensitiveParamFilter', () => {
       })
 
       it('filters out url params in query strings while maintaining non-sensitive data', () => {
-        expect(output.body.notes).toBe('Use https://login.example.com?username=jon.smith&password=FILTERED/?authentic=true to login.')
+        expect(output.body.notes).toBe(
+          'Use https://login.example.com?username=jon.smith&password=FILTERED/?authentic=true to login.',
+        )
       })
     })
 
     describe('filtering a custom object with read-only and non-enumerable properties', () => {
-      class VeryUnusualClass {
-        constructor () {
-          this.password = 'hunter12'
-          Reflect.defineProperty(this, 'readonly', {
-            enumerable: true,
-            value: 42,
-            writable: false
-          })
-          Reflect.defineProperty(this, 'hidden', {
-            enumerable: false,
-            value: 'You cannot see me',
-            writable: true
-          })
-        }
-
-        doSomething() {
-          return `${this.readonly} ${this.hidden}`
-        }
-      }
-
       const input = {
         message: 'hello',
-        veryUnusualObject: new VeryUnusualClass()
+        veryUnusualObject: new VeryUnusualClass(),
       }
 
       const numInputKeys = Object.keys(input).length
@@ -150,7 +133,7 @@ describe('SensitiveParamFilter', () => {
       const veryUnusualObjectType = typeof input.veryUnusualObject
       const veryUnusualObjectConstructor = input.veryUnusualObject.constructor
 
-      let output = null
+      let output: typeof input = input
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -188,10 +171,9 @@ describe('SensitiveParamFilter', () => {
     })
 
     describe('filtering errors with a code', () => {
-      const input = new Error('Something broke')
-      input.code = 'ERR_BROKEN'
+      const input = new ErrorWithCode('Something broke', 'ERR_BROKEN')
 
-      let output = null
+      let output: ErrorWithCode = input
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -212,37 +194,12 @@ describe('SensitiveParamFilter', () => {
       const inputReadonly = 42
       const inputHidden = 'You cannot see me'
 
-      class CustomError extends Error {
-        constructor (message, password, readonly, hidden) {
-          super(message)
-
-          this.password = password
-          Object.defineProperties(this, {
-            hidden: {
-              enumerable: false,
-              value: hidden,
-              writable: true
-            },
-            name: {
-              enumerable: false,
-              value: this.constructor.name,
-              writable: false
-            },
-            readonly: {
-              enumerable: true,
-              value: readonly,
-              writable: false
-            }
-          })
-        }
-      }
-
       const input = new CustomError(inputMessage, inputPassword, inputReadonly, inputHidden)
       const inputKeyCount = Object.keys(input).length
       const inputType = typeof input
       const inputConstructor = input.constructor
 
-      let output = null
+      let output = new CustomError('', '', 0, '')
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -285,28 +242,17 @@ describe('SensitiveParamFilter', () => {
     })
 
     describe('filtering a JSON parse error', () => {
-      let input = null
-      try {
-        JSON.parse('This is not a JSON string.  Do not parse it.')
-      } catch (error) {
-        input = error
-      }
-      input.Authorization = 'Username: Bob, Password: pa$$word'
-      input.customData = {
-        error: input,
-        info: '{ "json": false, "veryPrivateInfo": "credentials" }'
-      }
+      const input = customJsonParseError
 
       const inputMessage = input.message
       const inputStack = input.stack
-      const inputCode = input.code
 
       const numInputKeys = Object.keys(input).length
       const numCustomDataKeys = Object.keys(input.customData).length
       const inputType = typeof input
       const inputConstructor = input.constructor
 
-      let output = null
+      let output = input
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -319,7 +265,6 @@ describe('SensitiveParamFilter', () => {
 
         expect(input.message).toBe(inputMessage)
         expect(input.stack).toBe(inputStack)
-        expect(input.code).toBe(inputCode)
 
         expect(input.Authorization).toBe('Username: Bob, Password: pa$$word')
         expect(input.customData.info).toBe('{ "json": false, "veryPrivateInfo": "credentials" }')
@@ -333,10 +278,7 @@ describe('SensitiveParamFilter', () => {
       it('maintains non-sensitive data in the output, including circular references', () => {
         expect(Object.keys(output).length).toBe(numInputKeys)
         expect(typeof output).toBe(inputType)
-
         expect(output.stack).toBe(inputStack)
-        expect(output.code).toBe(inputCode)
-
         expect(output.customData.error).toBe(output)
       })
 
@@ -354,21 +296,12 @@ describe('SensitiveParamFilter', () => {
     })
 
     describe('filtering nested arrays', () => {
-      const input = [
-        { Authorization: 'Bearer somedatatoken', method: 'GET', url: 'https://some.url.org' },
-        12345,
-        [
-          { password: 'qwery123456', username: 'alice.smith' },
-          'Hello World'
-        ],
-        '{ "amount": 9.75, "credit_card_number": "4551201891449281" }'
-      ]
-      input[2].push(input)
+      const input = mixedArrayInput
 
       const inputLength = input.length
       const inputIndex2Length = input[2].length
 
-      let output = null
+      let output = input
       beforeEach(() => {
         output = paramFilter.filter(input)
       })
@@ -415,18 +348,9 @@ describe('SensitiveParamFilter', () => {
     })
 
     describe('filtering Maps and Sets', () => {
-      const complexKey = { privateStuff: 'aKeyThing', public: 'anotherKeyThing' }
-      const complexValue = { privateStuff: 'aValueThing', public: complexKey }
-      const input = {
-        map: new Map([
-          ['someNumber', 1234567],
-          ['password', 'aSecurePassword'],
-          [complexKey, complexValue]
-        ]),
-        set: new Set(['apple', 'banana', complexKey])
-      }
+      const input = mapAndSetInput
 
-      let output = null
+      let output = input
       beforeEach(() => {
         output = paramFilter.filter(input)
       })

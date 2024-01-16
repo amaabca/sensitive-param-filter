@@ -1,8 +1,8 @@
 {
   "name": "@amaabca/sensitive-param-filter",
-  "version": "1.2.8",
+  "version": "2.0.0",
   "description": "A package for filtering sensitive data (parameters, keys) from a variety of JS objects",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "author": "Alberta Motor Association",
   "license": "MIT",
   "keywords": [
@@ -16,14 +16,24 @@
   },
   "homepage": "https://github.com/amaabca/sensitive-param-filter",
   "devDependencies": {
-    "eslint": "8.5.0",
-    "jest": "27.4.5"
+    "@types/jest": "^29.5.11",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "dpdm": "^3.13.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.5.0",
+    "prettier": "^2.8.7",
+    "ts-jest": "^29.0.5",
+    "typescript": "^5.0.3"
   },
   "scripts": {
-    "lint": "eslint ./src ./test",
-    "pretest": "npm run lint",
+    "circular:check": "dpdm --exit-code circular:1 --warning false src/*",
+    "compile": "tsc",
+    "format:check": "prettier --ignore-path .gitignore --check .",
+    "format:fix": "prettier --ignore-path .gitignore --write .",
+    "lint": "eslint ./src ./test --max-warnings 0",
     "test": "jest --coverage",
-    "test:watch": "jest --watchAll=true --coverage=false"
+    "test:watch": "jest --watchAll=true --coverage=false",
+    "validate": "npm run format:check && npm run lint && npm run compile && npm run test && npm run circular:check"
   },
   "jest": {
     "collectCoverage": true,
@@ -31,6 +41,10 @@
       "src/**"
     ],
     "coverageDirectory": "coverage",
+    "coveragePathIgnorePatterns": [
+      "dist",
+      ".*\\.fixture\\.ts"
+    ],
     "coverageThreshold": {
       "global": {
         "branches": 100,
@@ -39,8 +53,9 @@
         "statements": 100
       }
     },
-    "testMatch": [
-      "**/*.test.js"
-    ]
+    "modulePathIgnorePatterns": [
+      "dist"
+    ],
+    "preset": "ts-jest"
   }
 }
