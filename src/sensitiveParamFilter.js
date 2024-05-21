@@ -39,8 +39,9 @@ class SensitiveParamFilter {
       return input
     }
     const id = input[circularReferenceKey]
-    if (id || id === 0) {
-      return this.examinedObjects[id].copy
+    const copy = this.examinedObjects && this.examinedObjects[id] && this.examinedObjects[id].copy
+    if (copy) {
+      return copy
     }
 
     if (typeof input === 'string' || input instanceof String) {
