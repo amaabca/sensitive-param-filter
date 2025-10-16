@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   install:
     runs-on: macos-latest
@@ -60,5 +64,3 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Publish to NPM
         run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
