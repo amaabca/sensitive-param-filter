@@ -29,7 +29,8 @@
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "src/**"
+      "src/**",
+      "!src/**/*.d.ts"
     ],
     "coverageDirectory": "coverage",
     "coverageThreshold": {
