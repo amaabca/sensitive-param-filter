@@ -16,8 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: npm install
-        run: npm install
+      - name: npm ci
+        run: npm ci
       - name: Upload built artifact
         uses: actions/upload-artifact@v4
         with:
