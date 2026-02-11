@@ -6,7 +6,7 @@ declare module '@amaabca/sensitive-param-filter' {
       params?: string[]
       replacement?: string
       filterUnknown?: boolean
-      whiteList?: string[]
+      whitelist?: string[]
     })
     filter<T>(obj: T): T
   }
