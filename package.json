@@ -3,6 +3,12 @@
   "version": "1.2.12",
   "description": "A package for filtering sensitive data (parameters, keys) from a variety of JS objects",
   "main": "src/index.js",
+  "exports": {
+    ".": {
+      "import": "./esm/index.mjs",
+      "require": "./src/index.js"
+    }
+  },
   "author": "Alberta Motor Association",
   "license": "MIT",
   "keywords": [
