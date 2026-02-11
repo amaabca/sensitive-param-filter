@@ -9,6 +9,7 @@
       "require": "./src/index.js"
     }
   },
+  "types": "./global.d.ts",
   "author": "Alberta Motor Association",
   "license": "MIT",
   "keywords": [
