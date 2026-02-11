@@ -1,6 +1,9 @@
 // See https://tools.ietf.org/html/rfc1738#section-2.2 and https://tools.ietf.org/html/rfc3986#section-2.2
 const urlDelimiters = '#;/?:@&'
-const urlParamRegex = new RegExp(`([${urlDelimiters}][^${urlDelimiters}=\\s]+=[^${urlDelimiters}=\\s]*)`, 'g')
+const urlParamRegex = new RegExp(
+  `([${urlDelimiters}][^${urlDelimiters}=\\s]+=[^${urlDelimiters}=\\s]*)`,
+  'g'
+)
 
 const circularReferenceKey = '__spf_1337_c1rc1ul4r_r3f3r3nc3_k3y__'
 
@@ -19,7 +22,6 @@ const constructWhitelistRegex = (whitelist) => {
   return { test: () => false }
 }
 
-
 const parseUrlParams = (input) => {
   const segments = []
   let previousEndIndex = 0
@@ -31,12 +33,12 @@ const parseUrlParams = (input) => {
 
     segments.push({
       key: null,
-      value: input.slice(previousEndIndex, index + 1)
+      value: input.slice(previousEndIndex, index + 1),
     })
     previousEndIndex = index + text.length
     segments.push({
       key: text.slice(1, text.indexOf('=')),
-      value: text.slice(text.indexOf('=') + 1, text.length)
+      value: text.slice(text.indexOf('=') + 1, text.length),
     })
     match = urlParamRegex.exec(input)
   }
@@ -45,7 +47,7 @@ const parseUrlParams = (input) => {
   if (lastSegment.length > 0) {
     segments.push({
       key: null,
-      value: lastSegment
+      value: lastSegment,
     })
   }
   return segments
@@ -55,5 +57,5 @@ module.exports = {
   circularReferenceKey,
   constructParamRegex,
   constructWhitelistRegex,
-  parseUrlParams
+  parseUrlParams,
 }

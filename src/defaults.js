@@ -8,12 +8,12 @@ const DEFAULT_PARAMS = [
   'PAN',
   'pass',
   'secret',
-  'token'
+  'token',
 ]
 
 const DEFAULT_REPLACEMENT = 'FILTERED'
 
 module.exports = {
   DEFAULT_PARAMS,
-  DEFAULT_REPLACEMENT
+  DEFAULT_REPLACEMENT,
 }
