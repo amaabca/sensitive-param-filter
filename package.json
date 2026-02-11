@@ -23,9 +23,12 @@
   "homepage": "https://github.com/amaabca/sensitive-param-filter",
   "devDependencies": {
     "eslint": "8.5.0",
-    "jest": "27.4.5"
+    "jest": "29.6.2",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.build.json",
     "lint": "eslint ./src ./test",
     "pretest": "npm run lint",
     "test": "jest --coverage",
