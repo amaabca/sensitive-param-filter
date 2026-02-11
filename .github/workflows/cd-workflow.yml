@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - ado-108387-esm-package-support
 
 permissions:
   contents: read
