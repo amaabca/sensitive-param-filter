@@ -1,7 +1,6 @@
 const DEFAULT_PARAMS = [
   'auth',
   'bearer',
-  'credit',
   'CVD',
   'CVV',
   'encrypt',
