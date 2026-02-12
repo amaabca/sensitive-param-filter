@@ -1,14 +1,4 @@
-const DEFAULT_PARAMS = [
-  'auth',
-  'bearer',
-  'CVD',
-  'CVV',
-  'encrypt',
-  'PAN',
-  'pass',
-  'secret',
-  'token',
-]
+const DEFAULT_PARAMS = ['auth', 'bearer', 'CVD', 'CVV', 'encrypt', 'PAN', 'pass', 'secret', 'token']
 
 const DEFAULT_REPLACEMENT = 'FILTERED'
 
