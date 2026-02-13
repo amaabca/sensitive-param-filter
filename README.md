@@ -19,7 +19,7 @@ or yarn:
 ## Usage
 
 ```js
-const { SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
+import { SensitiveParamFilter } from '@amaabca/sensitive-param-filter'
 const paramFilter = new SensitiveParamFilter()
 const rawObject = {
   Authorization: 'Bearer somedatatoken',
@@ -58,13 +58,19 @@ Key matching is done in a case-insensitive, partial-macthing manner (that is, if
 ### Options
 
 ```js
-const { SPFDefaultParams, SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
+import { SPFDefaultParams, SensitiveParamFilter } from '@amaabca/sensitive-param-filter'
 const filter = new SensitiveParamFilter({
   filterUnknown: false,
   params: SPFDefaultParams.concat(['data', 'email']),
   replacement: '***',
   whitelist: ['authentic', 'encryption_standard'],
 })
+```
+
+CommonJS imports are still supported, as well.
+
+```js
+const { SPFDefaultParams, SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
 ```
 
 - **filterUnknown:**
