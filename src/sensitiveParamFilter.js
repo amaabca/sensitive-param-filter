@@ -113,7 +113,6 @@ class SensitiveParamFilter {
     }
 
     for (const key in input) {
-      // eslint-disable-line guard-for-in
       copy[key] = input[key]
     }
     this.saveCopy(input, copy)

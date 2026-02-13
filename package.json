@@ -1,6 +1,6 @@
 {
   "name": "@amaabca/sensitive-param-filter",
-  "version": "1.2.12-ado-108387-esm-package-support-4",
+  "version": "1.2.12-ado-108387-esm-package-support-5",
   "description": "A package for filtering sensitive data (parameters, keys) from a variety of JS objects",
   "main": "src/index.js",
   "exports": {
