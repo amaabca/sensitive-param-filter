@@ -19,15 +19,15 @@ or yarn:
 ## Usage
 
 ```js
-const { SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
+import { SensitiveParamFilter } from '@amaabca/sensitive-param-filter'
 const paramFilter = new SensitiveParamFilter()
 const rawObject = {
   Authorization: 'Bearer somedatatoken',
   body: {
-    info: '{ "amount": 28.64, "credit_card": "4242424242424242", "cvv": "123" }'
+    info: '{ "amount": 28.64, "credit_card": "4242424242424242", "cvv": "123" }',
   },
   method: 'POST',
-  url: 'https://pay.example.com?user=bob.bobbington&password=asecurepassword1234'
+  url: 'https://pay.example.com?user=bob.bobbington&password=asecurepassword1234',
 }
 const filteredObject = paramFilter.filter(rawObject)
 // filteredObject = {
@@ -47,43 +47,49 @@ Key matching is done in a case-insensitive, partial-macthing manner (that is, if
 
 ### Key Features
 
- * Does not modify input objects
- * Performs a deep copy of the input object (note that booleans, numbers, and strings - which are immutable - are technically copied by reference)
- * Can be configued to filter out or leave "unexpected" objects (such as functions)
- * Handles circular references
- * Filters valid JSON strings
- * Filters valid and malformed URL query params
- * Filters Errors, Arrays, Maps, Sets, and simple objects
+- Does not modify input objects
+- Performs a deep copy of the input object (note that booleans, numbers, and strings - which are immutable - are technically copied by reference)
+- Can be configued to filter out or leave "unexpected" objects (such as functions)
+- Handles circular references
+- Filters valid JSON strings
+- Filters valid and malformed URL query params
+- Filters Errors, Arrays, Maps, Sets, and simple objects
 
 ### Options
 
 ```js
-const { SPFDefaultParams, SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
+import { SPFDefaultParams, SensitiveParamFilter } from '@amaabca/sensitive-param-filter'
 const filter = new SensitiveParamFilter({
   filterUnknown: false,
   params: SPFDefaultParams.concat(['data', 'email']),
   replacement: '***',
-  whitelist: ['authentic', 'encryption_standard']
+  whitelist: ['authentic', 'encryption_standard'],
 })
 ```
 
-* **filterUnknown:**
-Indicates whether "unexpected" objects (such as functions) should be filtered or returned as-is.
-Defaults to `true`
+CommonJS imports are still supported, as well.
 
-* **params:**
-An array of string params to filter.
-These entries will be combined into a regex that is used by sensitive-param-filter.
-Setting this option overwrites the default array (`SPFDefaultParams`).
+```js
+const { SPFDefaultParams, SensitiveParamFilter } = require('@amaabca/sensitive-param-filter')
+```
 
-* **replacement:**
-The object to replace filtered values with.
-Defaults to `'FILTERED'`.
+- **filterUnknown:**
+  Indicates whether "unexpected" objects (such as functions) should be filtered or returned as-is.
+  Defaults to `true`
 
-* **whitelist:**
-An array of strings to exclude from filtering.
-For example, if `pass_through` is including in the whitelist, the key `pass_through` will not be filtered.
-Note that entries must match keys exactly to prevent filtering - that is, whitelisting `secrets` still causes `secrets_store` to be filtered.
+- **params:**
+  An array of string params to filter.
+  These entries will be combined into a regex that is used by sensitive-param-filter.
+  Setting this option overwrites the default array (`SPFDefaultParams`).
+
+- **replacement:**
+  The object to replace filtered values with.
+  Defaults to `'FILTERED'`.
+
+- **whitelist:**
+  An array of strings to exclude from filtering.
+  For example, if `pass_through` is including in the whitelist, the key `pass_through` will not be filtered.
+  Note that entries must match keys exactly to prevent filtering - that is, whitelisting `secrets` still causes `secrets_store` to be filtered.
 
 ## Default Values
 
@@ -92,16 +98,15 @@ Note that all of these values can be overridden via the options.
 
 The default keys that are filtered are:
 
-* auth
-* bearer
-* credit
-* CVD
-* CVV
-* encrypt
-* PAN
-* pass
-* secret
-* token
+- auth
+- bearer
+- CVD
+- CVV
+- encrypt
+- PAN
+- pass
+- secret
+- token
 
 ## License & Contributing
 

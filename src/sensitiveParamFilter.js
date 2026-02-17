@@ -1,13 +1,10 @@
-const {
-  DEFAULT_PARAMS,
-  DEFAULT_REPLACEMENT
-} = require('./defaults')
+const { DEFAULT_PARAMS, DEFAULT_REPLACEMENT } = require('./defaults')
 
 const {
   constructParamRegex,
   constructWhitelistRegex,
   circularReferenceKey,
-  parseUrlParams
+  parseUrlParams,
 } = require('./helpers')
 
 class SensitiveParamFilter {
@@ -30,7 +27,7 @@ class SensitiveParamFilter {
     return output
   }
 
-  shouldFilter (text) {
+  shouldFilter(text) {
     return !this.whitelistRegex.test(text) && this.paramRegex.test(text)
   }
 
@@ -102,20 +99,20 @@ class SensitiveParamFilter {
         configurable: true,
         enumerable: false,
         value: input.name,
-        writable: true
+        writable: true,
       },
       stack: {
         configurable: true,
         enumerable: false,
         value: input.stack,
-        writable: true
-      }
+        writable: true,
+      },
     })
     if (input.code) {
       copy.code = input.code
     }
 
-    for (const key in input) { // eslint-disable-line guard-for-in
+    for (const key in input) {
       copy[key] = input[key]
     }
     this.saveCopy(input, copy)
@@ -177,7 +174,7 @@ class SensitiveParamFilter {
     original[circularReferenceKey] = id
     this.examinedObjects.push({
       copy,
-      original
+      original,
     })
   }
 
