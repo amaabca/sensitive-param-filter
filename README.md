@@ -100,7 +100,6 @@ The default keys that are filtered are:
 
 - auth
 - bearer
-- credit
 - CVD
 - CVV
 - encrypt
